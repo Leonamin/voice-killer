@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voice-killer"
+version = "0.1.0"
+description = "Enrollment-conditioned target speaker suppression research CLI"
+requires-python = ">=3.11,<3.12"
+dependencies = ["numpy", "scipy", "soundfile", "torch==2.7.1", "torchaudio==2.7.1", "pyyaml", "einops"]
+
+[project.optional-dependencies]
+research = ["faster-whisper==1.2.1", "gdown", "yt-dlp", "pytest"]
+
+[project.scripts]
+voice-killer = "voice_killer.cli:main"
+voice-killer-stream = "voice_killer.stream:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

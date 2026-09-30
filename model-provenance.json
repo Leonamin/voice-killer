@@ -1,0 +1,13 @@
+{
+  "upstream": "https://github.com/REAL-TSE/wesep-real-tse",
+  "revision": "2a540977a348fbaa92e623210505430e2cec608d",
+  "wespeaker_revision": "8f53b6485d9f88a207bd17e7f8dba899495ec794",
+  "archive_url": "https://drive.google.com/uc?export=download&id=1M4UqK2A2EeHmQ0pCevYqBgaYn3RvklgC",
+  "archive_sha256": "0a7e44050b1235db209181d7cda29ac93487fbb981ec768d3062b3243c49ce98",
+  "checkpoints": {
+    "spk_emb_100": "cbf551272a82dbcc972e2a6b1787142efae5174ca117857c7b0e7df5792888c0",
+    "tfmap_context_causal_100": "97c01b79b0cf1a5b914a4a3bc1113c1864752ebdd320f528e77a53202447fef2",
+    "tfmap_context_100": "0447f4abe3d033620eef8a7a345c3f75226e36ce896c6a51a8cf9bd75d028215",
+    "spk_emb_causal_100": "42b73219eefefcbba4b5da0dcb89dce292359c9f93b1a951c7b6d196da2155b3"
+  }
+}

@@ -1,0 +1,885 @@
+{
+  "date": "2026-09-30",
+  "full": {
+    "input": "/Users/leonamin/dev/voice-killer/data/source/iphone-2007.wav",
+    "input_sha256": "e94319e4d67c026ecfab96124644c527f114dd380ae7bf17054ae7470f8a98cb",
+    "enroll": "/Users/leonamin/dev/voice-killer/data/jobs-enroll.wav",
+    "enroll_sha256": "920e7531fb8cff3bed055ca354e03f4b67f91687cbc992975472897975970414",
+    "model_dir": "/Users/leonamin/dev/voice-killer/models/real-tse/spk_emb_100",
+    "checkpoint_sha256": "cbf551272a82dbcc972e2a6b1787142efae5174ca117857c7b0e7df5792888c0",
+    "config_sha256": "ee1a4f2428d348f3b84fdaab6a8371d1166810e953be4cec29363d86ebf6b9c2",
+    "method": "mask",
+    "strength": 1.0,
+    "mask_power": 4.0,
+    "hard_threshold": 0.65,
+    "device": "cpu",
+    "source_rate": 48000,
+    "output_rate": 16000,
+    "start": 0,
+    "duration": 619.1485,
+    "channels": 1,
+    "chunk_seconds": 12,
+    "overlap_seconds": 2,
+    "elapsed_seconds": 202.3676109999651,
+    "chunks": [
+      {
+        "start": 0.0,
+        "end": 12.0,
+        "seconds": 3.2586084170034155
+      },
+      {
+        "start": 10.0,
+        "end": 22.0,
+        "seconds": 3.422543791937642
+      },
+      {
+        "start": 20.0,
+        "end": 32.0,
+        "seconds": 3.3278537089936435
+      },
+      {
+        "start": 30.0,
+        "end": 42.0,
+        "seconds": 3.2502668329980224
+      },
+      {
+        "start": 40.0,
+        "end": 52.0,
+        "seconds": 3.012693125056103
+      },
+      {
+        "start": 50.0,
+        "end": 62.0,
+        "seconds": 3.1954658330651
+      },
+      {
+        "start": 60.0,
+        "end": 72.0,
+        "seconds": 3.2028476250125095
+      },
+      {
+        "start": 70.0,
+        "end": 82.0,
+        "seconds": 3.244516000035219
+      },
+      {
+        "start": 80.0,
+        "end": 92.0,
+        "seconds": 3.2454250829759985
+      },
+      {
+        "start": 90.0,
+        "end": 102.0,
+        "seconds": 3.215434291982092
+      },
+      {
+        "start": 100.0,
+        "end": 112.0,
+        "seconds": 3.240106499986723
+      },
+      {
+        "start": 110.0,
+        "end": 122.0,
+        "seconds": 3.1316711669787765
+      },
+      {
+        "start": 120.0,
+        "end": 132.0,
+        "seconds": 3.771776041947305
+      },
+      {
+        "start": 130.0,
+        "end": 142.0,
+        "seconds": 4.082880000001751
+      },
+      {
+        "start": 140.0,
+        "end": 152.0,
+        "seconds": 4.243869667057879
+      },
+      {
+        "start": 150.0,
+        "end": 162.0,
+        "seconds": 4.164482208085246
+      },
+      {
+        "start": 160.0,
+        "end": 172.0,
+        "seconds": 4.151967791025527
+      },
+      {
+        "start": 170.0,
+        "end": 182.0,
+        "seconds": 4.281156665994786
+      },
+      {
+        "start": 180.0,
+        "end": 192.0,
+        "seconds": 4.088806250016205
+      },
+      {
+        "start": 190.0,
+        "end": 202.0,
+        "seconds": 3.7707788329571486
+      },
+      {
+        "start": 200.0,
+        "end": 212.0,
+        "seconds": 3.2016497909789905
+      },
+      {
+        "start": 210.0,
+        "end": 222.0,
+        "seconds": 3.2695307079702616
+      },
+      {
+        "start": 220.0,
+        "end": 232.0,
+        "seconds": 3.241364625049755
+      },
+      {
+        "start": 230.0,
+        "end": 242.0,
+        "seconds": 3.2070703329518437
+      },
+      {
+        "start": 240.0,
+        "end": 252.0,
+        "seconds": 3.1670306670712307
+      },
+      {
+        "start": 250.0,
+        "end": 262.0,
+        "seconds": 2.959208165993914
+      },
+      {
+        "start": 260.0,
+        "end": 272.0,
+        "seconds": 3.054513792041689
+      },
+      {
+        "start": 270.0,
+        "end": 282.0,
+        "seconds": 3.047905166982673
+      },
+      {
+        "start": 280.0,
+        "end": 292.0,
+        "seconds": 3.2325767499860376
+      },
+      {
+        "start": 290.0,
+        "end": 302.0,
+        "seconds": 3.0039671659469604
+      },
+      {
+        "start": 300.0,
+        "end": 312.0,
+        "seconds": 3.042835291940719
+      },
+      {
+        "start": 310.0,
+        "end": 322.0,
+        "seconds": 3.0650187500286847
+      },
+      {
+        "start": 320.0,
+        "end": 332.0,
+        "seconds": 3.057601625099778
+      },
+      {
+        "start": 330.0,
+        "end": 342.0,
+        "seconds": 3.0500320410355926
+      },
+      {
+        "start": 340.0,
+        "end": 352.0,
+        "seconds": 3.0492166249314323
+      },
+      {
+        "start": 350.0,
+        "end": 362.0,
+        "seconds": 3.0489326250972226
+      },
+      {
+        "start": 360.0,
+        "end": 372.0,
+        "seconds": 3.061855750042014
+      },
+      {
+        "start": 370.0,
+        "end": 382.0,
+        "seconds": 3.0525202919961885
+      },
+      {
+        "start": 380.0,
+        "end": 392.0,
+        "seconds": 3.0633980419952422
+      },
+      {
+        "start": 390.0,
+        "end": 402.0,
+        "seconds": 3.0477907080203295
+      },
+      {
+        "start": 400.0,
+        "end": 412.0,
+        "seconds": 3.054685250041075
+      },
+      {
+        "start": 410.0,
+        "end": 422.0,
+        "seconds": 3.0674082919722423
+      },
+      {
+        "start": 420.0,
+        "end": 432.0,
+        "seconds": 3.0546887500677258
+      },
+      {
+        "start": 430.0,
+        "end": 442.0,
+        "seconds": 3.05757179192733
+      },
+      {
+        "start": 440.0,
+        "end": 452.0,
+        "seconds": 3.079902624944225
+      },
+      {
+        "start": 450.0,
+        "end": 462.0,
+        "seconds": 3.1022245000349358
+      },
+      {
+        "start": 460.0,
+        "end": 472.0,
+        "seconds": 3.041551125003025
+      },
+      {
+        "start": 470.0,
+        "end": 482.0,
+        "seconds": 3.065080542000942
+      },
+      {
+        "start": 480.0,
+        "end": 492.0,
+        "seconds": 3.085263208951801
+      },
+      {
+        "start": 490.0,
+        "end": 502.0,
+        "seconds": 3.0619322910206392
+      },
+      {
+        "start": 500.0,
+        "end": 512.0,
+        "seconds": 3.057914500008337
+      },
+      {
+        "start": 510.0,
+        "end": 522.0,
+        "seconds": 3.0560743749374524
+      },
+      {
+        "start": 520.0,
+        "end": 532.0,
+        "seconds": 3.0645419580396265
+      },
+      {
+        "start": 530.0,
+        "end": 542.0,
+        "seconds": 3.0477299590129405
+      },
+      {
+        "start": 540.0,
+        "end": 552.0,
+        "seconds": 3.080578958033584
+      },
+      {
+        "start": 550.0,
+        "end": 562.0,
+        "seconds": 3.03636354196351
+      },
+      {
+        "start": 560.0,
+        "end": 572.0,
+        "seconds": 3.057824916904792
+      },
+      {
+        "start": 570.0,
+        "end": 582.0,
+        "seconds": 3.066251792013645
+      },
+      {
+        "start": 580.0,
+        "end": 592.0,
+        "seconds": 3.074685874977149
+      },
+      {
+        "start": 590.0,
+        "end": 602.0,
+        "seconds": 3.057287500007078
+      },
+      {
+        "start": 600.0,
+        "end": 612.0,
+        "seconds": 3.055469625047408
+      },
+      {
+        "start": 610.0,
+        "end": 619.1485,
+        "seconds": 2.4133592499420047
+      }
+    ],
+    "output_peak": 0.9871618151664734,
+    "outputs": {
+      "filtered": {
+        "path": "/Users/leonamin/dev/voice-killer/outputs/iphone-2007-final.wav",
+        "sha256": "c2c7b6390f0a9659f73c0d95223394c5c3997f4e16533db99dfbca9ba581e320"
+      },
+      "original": {
+        "path": "/Users/leonamin/dev/voice-killer/outputs/iphone-2007-final.original.wav",
+        "sha256": "60dab585826781afefeb6fd0e8ab8858db1cb63863e079a2c2b6a2cd1bc862f1"
+      },
+      "target": {
+        "path": "/Users/leonamin/dev/voice-killer/outputs/iphone-2007-final.target.wav",
+        "sha256": "aa64facbc1a1d9f4770bd9964270f7da93d8480aef1b4b9a931425d5461b88ac"
+      }
+    }
+  },
+  "stream": {
+    "sample_rate": 16000,
+    "samples": 1120000,
+    "block_seconds": 2,
+    "context_seconds": 2,
+    "mask_power": 4,
+    "hard_threshold": 0.65,
+    "model_dir": "/Users/leonamin/dev/voice-killer/models/real-tse/spk_emb_100",
+    "elapsed_seconds": 71.2652237919392,
+    "note": "Buffered noncausal model. Block accumulation + inference delay; microphone/DAC delay not measured.",
+    "blocks": [
+      {
+        "start": 0.0,
+        "duration": 2.0,
+        "processing_seconds": 0.739126457949169,
+        "emitted_seconds_since_ready": 2.7496754579478875
+      },
+      {
+        "start": 2.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2670006669359282,
+        "emitted_seconds_since_ready": 5.277527624974027
+      },
+      {
+        "start": 4.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2459220830351114,
+        "emitted_seconds_since_ready": 7.256484416895546
+      },
+      {
+        "start": 6.0,
+        "duration": 2.0,
+        "processing_seconds": 1.258681625011377,
+        "emitted_seconds_since_ready": 9.269394374918193
+      },
+      {
+        "start": 8.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2574718330288306,
+        "emitted_seconds_since_ready": 11.267978957970627
+      },
+      {
+        "start": 10.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2413327500689775,
+        "emitted_seconds_since_ready": 13.251869041938335
+      },
+      {
+        "start": 12.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2657419999595731,
+        "emitted_seconds_since_ready": 15.276260749902576
+      },
+      {
+        "start": 14.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2538345420034602,
+        "emitted_seconds_since_ready": 17.26436199992895
+      },
+      {
+        "start": 16.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2541547080036253,
+        "emitted_seconds_since_ready": 19.264668332994916
+      },
+      {
+        "start": 18.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2488761249696836,
+        "emitted_seconds_since_ready": 21.259398874943145
+      },
+      {
+        "start": 20.0,
+        "duration": 2.0,
+        "processing_seconds": 1.222488290979527,
+        "emitted_seconds_since_ready": 23.233018666971475
+      },
+      {
+        "start": 22.0,
+        "duration": 2.0,
+        "processing_seconds": 1.3020427910378203,
+        "emitted_seconds_since_ready": 25.31293499993626
+      },
+      {
+        "start": 24.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6300226660678163,
+        "emitted_seconds_since_ready": 27.64378770790063
+      },
+      {
+        "start": 26.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6050950409844518,
+        "emitted_seconds_since_ready": 29.609324291930534
+      },
+      {
+        "start": 28.0,
+        "duration": 2.0,
+        "processing_seconds": 1.5789115000516176,
+        "emitted_seconds_since_ready": 31.589539416949265
+      },
+      {
+        "start": 30.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6165555421030149,
+        "emitted_seconds_since_ready": 33.627132916939445
+      },
+      {
+        "start": 32.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6187024579849094,
+        "emitted_seconds_since_ready": 35.629316541948356
+      },
+      {
+        "start": 34.0,
+        "duration": 2.0,
+        "processing_seconds": 1.5699401249876246,
+        "emitted_seconds_since_ready": 37.57564537494909
+      },
+      {
+        "start": 36.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6121522919274867,
+        "emitted_seconds_since_ready": 39.62294233299326
+      },
+      {
+        "start": 38.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6150141670368612,
+        "emitted_seconds_since_ready": 41.625665582949296
+      },
+      {
+        "start": 40.0,
+        "duration": 2.0,
+        "processing_seconds": 1.5961479999823496,
+        "emitted_seconds_since_ready": 43.606777957989834
+      },
+      {
+        "start": 42.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6169107080204412,
+        "emitted_seconds_since_ready": 45.62753079191316
+      },
+      {
+        "start": 44.0,
+        "duration": 2.0,
+        "processing_seconds": 1.6546444999985397,
+        "emitted_seconds_since_ready": 47.65873129188549
+      },
+      {
+        "start": 46.0,
+        "duration": 2.0,
+        "processing_seconds": 1.586950207944028,
+        "emitted_seconds_since_ready": 49.594809916918166
+      },
+      {
+        "start": 48.0,
+        "duration": 2.0,
+        "processing_seconds": 1.5944417089922354,
+        "emitted_seconds_since_ready": 51.60500049998518
+      },
+      {
+        "start": 50.0,
+        "duration": 2.0,
+        "processing_seconds": 1.5740486660506576,
+        "emitted_seconds_since_ready": 53.58475699997507
+      },
+      {
+        "start": 52.0,
+        "duration": 2.0,
+        "processing_seconds": 1.4970970419235528,
+        "emitted_seconds_since_ready": 55.5076497499831
+      },
+      {
+        "start": 54.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2841460420750082,
+        "emitted_seconds_since_ready": 57.29257612489164
+      },
+      {
+        "start": 56.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2597026249859482,
+        "emitted_seconds_since_ready": 59.27027937490493
+      },
+      {
+        "start": 58.0,
+        "duration": 2.0,
+        "processing_seconds": 1.243113417061977,
+        "emitted_seconds_since_ready": 61.253698291955516
+      },
+      {
+        "start": 60.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2621345000807196,
+        "emitted_seconds_since_ready": 63.27267574996222
+      },
+      {
+        "start": 62.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2404218330048025,
+        "emitted_seconds_since_ready": 65.24329720798414
+      },
+      {
+        "start": 64.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2721351250074804,
+        "emitted_seconds_since_ready": 67.2826923748944
+      },
+      {
+        "start": 66.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2432182499906048,
+        "emitted_seconds_since_ready": 69.25394554191735
+      },
+      {
+        "start": 68.0,
+        "duration": 2.0,
+        "processing_seconds": 1.2543148749973625,
+        "emitted_seconds_since_ready": 71.2648919998901
+      }
+    ],
+    "driver_wall_seconds": 71.44791437499225,
+    "driver": "real-time-paced file -> stdin PCM -> streaming filter -> stdout PCM"
+  },
+  "controlled": {
+    "source_intervals": {
+      "speech": [
+        39.8,
+        48.6
+      ],
+      "audience": [
+        49.5,
+        58.3
+      ]
+    },
+    "results": {
+      "speech_only": {
+        "subtract": {
+          "rms_change_db": -11.603375769163156
+        },
+        "mask1": {
+          "rms_change_db": -15.121681673468132
+        },
+        "mask2": {
+          "rms_change_db": -24.411107527002677
+        },
+        "mask4": {
+          "rms_change_db": -26.775457017192764
+        },
+        "mask8": {
+          "rms_change_db": -26.62486957184712
+        },
+        "mask_hard": {
+          "rms_change_db": -26.792211393116997
+        }
+      },
+      "audience_only": {
+        "subtract": {
+          "rms_change_db": -1.3187012154804842
+        },
+        "mask1": {
+          "rms_change_db": -1.3841410046533673
+        },
+        "mask2": {
+          "rms_change_db": -0.7283593174453247
+        },
+        "mask4": {
+          "rms_change_db": -0.49798217442554793
+        },
+        "mask8": {
+          "rms_change_db": -0.42637885396324243
+        },
+        "mask_hard": {
+          "rms_change_db": -0.4984164002193666
+        }
+      },
+      "overlap_equal_rms": {
+        "subtract": {
+          "rms_change_db": -3.878903060691531,
+          "speech_component_gain_db": -15.106552124023438,
+          "audience_component_gain_db": -1.7913808822631836,
+          "audience_error_snr_db": 7.239501476287842
+        },
+        "mask1": {
+          "rms_change_db": -4.184633836293172,
+          "speech_component_gain_db": -13.645599365234375,
+          "audience_component_gain_db": -1.8604357242584229,
+          "audience_error_snr_db": 8.300220489501953
+        },
+        "mask2": {
+          "rms_change_db": -3.650385581367001,
+          "speech_component_gain_db": -20.751983642578125,
+          "audience_component_gain_db": -1.1957765817642212,
+          "audience_error_snr_db": 9.257015228271484
+        },
+        "mask4": {
+          "rms_change_db": -3.3709261025953485,
+          "speech_component_gain_db": -24.79861068725586,
+          "audience_component_gain_db": -0.9213810563087463,
+          "audience_error_snr_db": 9.215570449829102
+        },
+        "mask8": {
+          "rms_change_db": -3.274037256494671,
+          "speech_component_gain_db": -25.040342330932617,
+          "audience_component_gain_db": -0.8391976952552795,
+          "audience_error_snr_db": 9.086661338806152
+        },
+        "mask_hard": {
+          "rms_change_db": -3.3718972731709336,
+          "speech_component_gain_db": -25.08281707763672,
+          "audience_component_gain_db": -0.926780641078949,
+          "audience_error_snr_db": 9.182910919189453
+        }
+      }
+    }
+  },
+  "asr_proxy": {
+    "model": "base.en",
+    "beam_size": 3,
+    "condition_on_previous_text": false,
+    "warning": "ASR hallucinations occur on suppressed audio; not a human intelligibility test.",
+    "results": {
+      "reveal_original": [
+        {
+          "start": 0.0,
+          "end": 6.4,
+          "text": " So three things, a widescreen iPod with touch controls,"
+        },
+        {
+          "start": 6.4,
+          "end": 10.32,
+          "text": " a revolutionary mobile phone, and a breakthrough internet"
+        },
+        {
+          "start": 10.32,
+          "end": 18.92,
+          "text": " communications device, an iPod, a phone,"
+        },
+        {
+          "start": 18.92,
+          "end": 24.68,
+          "text": " and an internet communicator, an iPod, a phone."
+        },
+        {
+          "start": 24.68,
+          "end": 43.28,
+          "text": " are you getting it? These are not three separate devices. This is one device. And we are calling"
+        },
+        {
+          "start": 43.28,
+          "end": 65.84,
+          "text": " it's iPhone. Today, Apple is going to reinvent the phone. And here it is. Now, actually here"
+        },
+        {
+          "start": 65.84,
+          "end": 72.84,
+          "text": " it is, but we're going to leave it there for now."
+        }
+      ],
+      "reveal_filtered": [
+        {
+          "start": 0.0,
+          "end": 1.0,
+          "text": " Uh-huh."
+        },
+        {
+          "start": 30.0,
+          "end": 32.0,
+          "text": " Thank you very much."
+        },
+        {
+          "start": 60.0,
+          "end": 67.0,
+          "text": " Thank you very much."
+        }
+      ],
+      "stream_filtered": [
+        {
+          "start": 0.0,
+          "end": 2.0,
+          "text": " You"
+        },
+        {
+          "start": 30.0,
+          "end": 36.0,
+          "text": " I'm getting tired."
+        },
+        {
+          "start": 36.0,
+          "end": 44.0,
+          "text": " I'm getting tired."
+        },
+        {
+          "start": 44.0,
+          "end": 49.0,
+          "text": " I'm getting tired."
+        },
+        {
+          "start": 49.0,
+          "end": 53.6,
+          "text": " I'm going to turn around."
+        },
+        {
+          "start": 53.6,
+          "end": 58.56,
+          "text": " My phone is on TV."
+        },
+        {
+          "start": 58.56,
+          "end": 63.26,
+          "text": " I'm going to turn around."
+        },
+        {
+          "start": 63.26,
+          "end": 68.96000000000001,
+          "text": " I'm not going to turn around."
+        },
+        {
+          "start": 68.96000000000001,
+          "end": 75.64,
+          "text": " I'm not going to turn around."
+        }
+      ],
+      "long_250_original": [
+        {
+          "start": 0.0,
+          "end": 4.48,
+          "text": " Smart phones are definitely a little smarter, but they actually are harder to use."
+        },
+        {
+          "start": 4.48,
+          "end": 6.32,
+          "text": " They're really complicated."
+        },
+        {
+          "start": 6.32,
+          "end": 10.88,
+          "text": " Just for the basic stuff, people have a hard time figuring out how to use them."
+        },
+        {
+          "start": 10.88,
+          "end": 13.48,
+          "text": " Well we don't want to do either one of these things."
+        },
+        {
+          "start": 13.48,
+          "end": 20.0,
+          "text": " What we want to do is make a LeapFrog product that is way smarter than any mobile devices"
+        }
+      ],
+      "long_250_filtered": [],
+      "long_420_original": [
+        {
+          "start": 0.0,
+          "end": 4.32,
+          "text": " device that we're all born with. We're born with 10 of them. We're going to use our fingers."
+        },
+        {
+          "start": 5.28,
+          "end": 10.0,
+          "text": " We're going to touch us with our fingers. And we have invented a new technology called"
+        },
+        {
+          "start": 10.0,
+          "end": 19.92,
+          "text": " multi-touch, which is phenomenal. It works like magic. You don't need a stylus. It's far more"
+        }
+      ],
+      "long_420_filtered": [
+        {
+          "start": 0.0,
+          "end": 2.0,
+          "text": " Thank you very much."
+        }
+      ],
+      "long_580_original": [
+        {
+          "start": 0.0,
+          "end": 5.6000000000000005,
+          "text": " One of the pioneers of our industry, Alan Kay, has had a lot of great quotes throughout"
+        },
+        {
+          "start": 5.6000000000000005,
+          "end": 13.44,
+          "text": " the years, and I ran across one of them recently that explains how we look at this, explains"
+        },
+        {
+          "start": 13.44,
+          "end": 18.96,
+          "text": " why we go about doing things the way we do, because we love software."
+        },
+        {
+          "start": 18.96,
+          "end": 37.900000000000006,
+          "text": " And here's the quote."
+        }
+      ],
+      "long_580_filtered": [
+        {
+          "start": 0.0,
+          "end": 5.0,
+          "text": " I'm going to go ahead and do this for you."
+        },
+        {
+          "start": 6.0,
+          "end": 13.0,
+          "text": " I'm going to go ahead and do this for a second."
+        },
+        {
+          "start": 13.0,
+          "end": 20.0,
+          "text": " I'm going to go ahead and do this for you."
+        }
+      ]
+    }
+  },
+  "listening_artifacts": {
+    "outputs/demo-before.wav": "ee4b55f1ac2ecfc8f817809d638b4d34a1a9b6e31a076847e66fe1a44f3fff90",
+    "outputs/demo-after.wav": "61baddbca1d0162efdf69535217f49d6d12fd3f48653bd88f714eaf4b0941d04",
+    "outputs/stream-v2/filtered.wav": "bea5902a6cc2313cc8ab9292ab0a51f65cd395f19643712ab596806b513ed763"
+  },
+  "tests": {
+    "passed": 14,
+    "command": ".venv-verify/bin/python -m pytest -q -p no:cacheprovider"
+  },
+  "limitations": [
+    "16 kHz mono output",
+    "some loud cheering is suppressed",
+    "no human intelligibility panel",
+    "no microphone/DAC end-to-end latency measurement",
+    "other speakers/languages not validated"
+  ]
+}
