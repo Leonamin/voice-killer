@@ -19,3 +19,4 @@ timestamp: 2026-10-14
 - 구현: 트랙 D 음성 변환(Seed-VC worker, `engine.convert`, 웹 변환 모드)을 추가했다. 웹 경로 화자 유사도가 스파이크와 일치했다.
 - 변경: 다른 기기 접속을 위해 `--host`와 HTTPS 옵션을 추가했다(ADR 003 갱신). 쓰지 않는 OpenVoice 환경과 Seed-VC 실시간 전용 가중치를 삭제했다.
 - 결정: DESIGN.md(다크 네온, Pretendard, Star IA)와 ADR 005(React + Goodcase UI 프런트엔드)를 추가했다.
+- 구현: React 프런트엔드 1·2단계(허브, 소스·참조·추출·제거·변환·실시간 패널)를 완료하고 `web.html`을 삭제했다.

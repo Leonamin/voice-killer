@@ -37,7 +37,7 @@ export function Waveform({ blob, range, initial, kind, label, onReady, onRange, 
   }, [blob, kind, label]);
 
   useImperativeHandle(ref, () => ({
-    playRegion() { // ponytail: same as web.html; replays from region start, stops at end
+    playRegion() { // ponytail: replays from region start, stops at end
       const i = inst.current;
       if (!i?.region) return;
       const { ws, region } = i;

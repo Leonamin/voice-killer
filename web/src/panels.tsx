@@ -38,11 +38,11 @@ function FilePick({ label, onFile }: { label: string; onFile: (f: File) => void 
 
 export function Hub() {
   const { s } = useApp();
-  const next: [string, NodeId | null] = statusOf(s, "source") !== "완료" ? ["다음: 소스 불러오기", "source"]
-    : statusOf(s, "reference") !== "완료" ? ["다음: 참조 지정", "reference"] : ["아래에서 작업을 고르세요", null];
+  const next: [string, NodeId] = statusOf(s, "source") !== "완료" ? ["다음: 소스 불러오기", "source"]
+    : statusOf(s, "reference") !== "완료" ? ["다음: 참조 지정", "reference"] : ["추천: 제거 해 보기", "remove"];
   return (
     <Panel title="작업 공간" purpose="소스와 참조를 정한 뒤 작업을 고르세요."
-      cta={next[1] ? <Button onClick={() => go(next[1]!)}>{next[0]}</Button> : <span className="vk-muted">{next[0]}</span>}>
+      cta={<Button onClick={() => go(next[1])}>{next[0]}</Button>}>
       <div className="vk-hub">
         {NODES.map((n) => (
           <Card key={n.id} title={<><a className="vk-stretch" href={`#/${n.id}`}>{n.label}</a><StatusBadge status={statusOf(s, n.id)} /></>}>
@@ -190,15 +190,6 @@ export function TaskPanel({ task }: { task: Task }) {
       {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={running || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}
       {res && <ResultBlock key={res.createdAt} task={task} res={res} />}
       {res && <div><Button variant="secondary" isLoading={running} disabled={missing.length > 0 || otherRunning} onClick={exec}>다시 실행</Button></div>}
-    </Panel>
-  );
-}
-
-export function LivePanel() {
-  return (
-    <Panel title="실시간" purpose="마이크나 파일에서 대상 목소리를 실시간으로 제거합니다."
-      cta={<Button onClick={() => go("hub")}>다른 작업 하기</Button>}>
-      <Alert tone="neutral" title="준비 중">2단계에서 이식합니다.</Alert>
     </Panel>
   );
 }

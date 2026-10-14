@@ -2,7 +2,8 @@ import { useState, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import { Badge, Button, Drawer, ToastProvider } from "./ui/components";
 import { AppProvider, statusOf, useApp, type NodeId, type Status } from "./state";
-import { Hub, LivePanel, ReferencePanel, SourcePanel, TaskPanel } from "./panels";
+import { Live } from "./Live";
+import { Hub, ReferencePanel, SourcePanel, TaskPanel } from "./panels";
 
 export const NODES: { id: NodeId; label: string; desc: string; group: string }[] = [
   { id: "source", label: "소스", desc: "처리할 오디오와 처리 구간", group: "공통 자원" },
@@ -71,7 +72,7 @@ function Shell() {
       </header>
       <main className="vk-main">
         {route === "hub" ? <Hub /> : route === "source" ? <SourcePanel /> : route === "reference" ? <ReferencePanel />
-          : route === "live" ? <LivePanel /> : <TaskPanel key={route} task={route} />}
+          : route === "live" ? <Live /> : <TaskPanel key={route} task={route} />}
       </main>
     </div>
   );

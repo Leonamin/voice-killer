@@ -56,3 +56,13 @@ a.gc-button { text-decoration: none; }
   .vk-main { padding: var(--vk-space-2xl); }
   .vk-panel { padding: var(--vk-space-xl); }
 }
+
+/* 실시간 패널 */
+.gc-button.vk-btn-live { background: var(--vk-live); color: var(--vk-on-accent); }
+.gc-button.vk-btn-live:hover:not(:disabled) { background: var(--vk-live-hover); }
+.gc-button.vk-btn-live:disabled { background: var(--vk-surface-raised); color: var(--vk-text-muted); }
+.vk-live-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--vk-live); box-shadow: 0 0 12px #39ff8859; margin-left: var(--vk-space-sm); }
+.vk-tiles { display: grid; gap: var(--vk-space-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+.vk-tile { background: var(--vk-surface-subtle); border-radius: var(--vk-rounded-md); padding: var(--vk-space-lg); display: flex; flex-direction: column; gap: var(--vk-space-xs); min-width: 0; }
+.vk-tile .vk-muted { font-size: var(--vk-label-size); }
+.vk-tile output { overflow-wrap: anywhere; }
