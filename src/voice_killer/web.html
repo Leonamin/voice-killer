@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice Killer</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:860px;margin:0 auto;padding:16px;color:#222;background:#fff}
+fieldset{margin:12px 0;border:1px solid #ccc;border-radius:6px}
+button,input,label{font:inherit}
+button{padding:4px 12px;cursor:pointer}
+button:disabled{cursor:wait;opacity:.6}
+.wave{margin:8px 0}
+#error{color:#b00020;min-height:1.5em;white-space:pre-wrap}
+audio{width:100%}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:6px 0}
+@media (prefers-color-scheme:dark){body{background:#181818;color:#eee}fieldset{border-color:#555}#error{color:#ff8a80}a{color:#8ab4f8}}
+</style>
+</head>
+<body>
+<h1>Voice Killer</h1>
+<fieldset><legend>1. 오디오</legend>
+ <div class="row">
+  <label>파일 올리기 <input type="file" id="file" accept="audio/*,video/*"></label>
+  <button id="rec" type="button">녹음 시작</button>
+ </div>
+ <div id="wave" class="wave"></div>
+ <div class="row"><button id="playProc" type="button" disabled>▶ 처리 구간</button><button id="playRef" type="button" disabled>▶ 참조 구간</button></div>
+ <p>처리 구간은 결과를 만들 부분, 참조 구간은 지우거나 추출할 사람이 혼자 말하는 5~10초입니다.</p>
+</fieldset>
+<fieldset><legend>2. 참조를 다른 파일에서 (선택)</legend>
+ <div class="row"><label>참조 파일 <input type="file" id="reffile" accept="audio/*,video/*"></label><button id="refclear" type="button" hidden>참조 파일 해제</button></div>
+ <div id="refwave" class="wave"></div>
+</fieldset>
+<fieldset><legend>3. 실행</legend>
+ <div class="row">
+  <label><input type="radio" name="mode" value="extract"> 추출</label>
+  <label><input type="radio" name="mode" value="remove" checked> 제거</label>
+  <label><input type="radio" name="mode" value="convert"> 변환</label>
+  <label id="strwrap">강도 <input type="range" id="strength" min="0" max="1" step="0.05" value="1"> <output id="strout">1.00</output></label>
+ </div>
+ <div class="row"><button id="run" type="button" disabled>실행</button><span id="status" role="status"></span></div>
+ <div id="error" role="alert"></div>
+</fieldset>
+<fieldset id="result" hidden><legend>4. 결과</legend>
+ <audio id="out" controls></audio>
+ <div class="row"><button id="ab" type="button" aria-pressed="false">A/B 전환</button><a id="dl" download="result.wav">다운로드</a></div>
+ <audio id="orig" hidden></audio>
+</fieldset>
+<script type="module">
+import WaveSurfer from "https://unpkg.com/wavesurfer.js@7.8.6/dist/wavesurfer.esm.js";
+import RegionsPlugin from "https://unpkg.com/wavesurfer.js@7.8.6/dist/plugins/regions.esm.js";
+const $ = id => document.getElementById(id);
+let main, ref, proc, refReg, mainBlob, refBlob, resultUrl, origUrl, running = false;
+
+function make(el, blob, ready) {
+  const regions = RegionsPlugin.create(), ws = WaveSurfer.create({container: el, height: 80, url: URL.createObjectURL(blob), plugins: [regions]});
+  const m = {ws};
+  ws.on("ready", d => ready(regions, d));
+  return m;
+}
+const add = (regions, start, end, content, color) => regions.addRegion({start, end, content, color, drag: true, resize: true});
+const play = (ws, r) => { ws.setTime(r.start); ws.play(); const stop = () => { if (ws.getCurrentTime() >= r.end) { ws.pause(); ws.un("timeupdate", stop); } }; ws.on("timeupdate", stop); };
+
+function loadMain(blob) {
+  mainBlob = blob; $("error").textContent = ""; $("result").hidden = true;
+  if (main) main.ws.destroy();
+  $("wave").textContent = "";
+  main = make($("wave"), blob, (regions, d) => {
+    proc = add(regions, 0, d, "처리 구간", "rgba(40,120,255,.25)");
+    refReg = add(regions, 0, Math.min(7, d), "참조 구간", "rgba(255,120,0,.35)");
+    $("run").disabled = $("playProc").disabled = $("playRef").disabled = false;
+  });
+}
+function loadRef(blob) {
+  refBlob = blob; if (ref) ref.ws.destroy(); $("refwave").textContent = "";
+  $("refclear").hidden = !blob; if (refReg) refReg.element.style.display = blob ? "none" : "";
+  if (!blob) return;
+  ref = make($("refwave"), blob, (regions, d) => { ref.reg = add(regions, 0, Math.min(7, d), "참조 구간", "rgba(255,120,0,.35)"); });
+}
+const regOf = () => refBlob ? ref.reg : refReg;
+
+$("file").onchange = e => e.target.files[0] && loadMain(e.target.files[0]);
+$("reffile").onchange = e => loadRef(e.target.files[0] || null);
+$("refclear").onclick = () => { $("reffile").value = ""; loadRef(null); };
+$("playProc").onclick = () => play(main.ws, proc);
+$("playRef").onclick = () => refBlob ? play(ref.ws, ref.reg) : play(main.ws, refReg);
+
+let rec, chunks;
+$("rec").onclick = async () => {
+  if (rec) { rec.stop(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    rec = new MediaRecorder(stream); chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); const b = new Blob(chunks, {type: rec.mimeType}); rec = null; $("rec").textContent = "녹음 시작"; loadMain(b); };
+    rec.start(); $("rec").textContent = "녹음 중지";
+  } catch (err) { $("error").textContent = "마이크를 사용할 수 없습니다: " + err.message; }
+};
+
+const sync = () => $("strwrap").hidden = document.querySelector("input[name=mode]:checked").value !== "remove";
+document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = sync); sync();
+$("strength").oninput = e => $("strout").textContent = (+e.target.value).toFixed(2);
+
+$("run").onclick = async () => {
+  if (running) return;
+  running = true; $("run").disabled = true; $("status").textContent = "처리 중…"; $("error").textContent = "";
+  try {
+    const fd = new FormData(), rr = regOf();
+    fd.append("audio", mainBlob, "input"); fd.append("start", proc.start); fd.append("end", proc.end);
+    if (refBlob) fd.append("ref", refBlob, "ref");
+    fd.append("ref_start", rr.start); fd.append("ref_end", rr.end);
+    fd.append("mode", document.querySelector("input[name=mode]:checked").value); fd.append("strength", $("strength").value);
+    const r = await fetch("/api/process", {method: "POST", body: fd});
+    if (!r.ok) { let m = r.statusText; try { const j = await r.json(); m = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail); } catch {} throw new Error(`${r.status}: ${m}`); }
+    const blob = await r.blob();
+    if (resultUrl) URL.revokeObjectURL(resultUrl);
+    resultUrl = URL.createObjectURL(blob);
+    $("out").src = resultUrl; $("dl").href = resultUrl; $("result").hidden = false;
+    $("orig").src = origUrl = URL.createObjectURL(mainBlob); abSide = "A"; setAb();
+  } catch (e) { $("error").textContent = "오류 " + e.message; }
+  finally { running = false; $("run").disabled = false; $("status").textContent = ""; }
+};
+
+// A/B: original 처리 구간 (A) vs result (B); both play from the same offset within the 처리 구간
+let abSide = "A";
+const setAb = () => { $("ab").textContent = abSide === "A" ? "원본(A) 재생 중 - 눌러서 결과(B)로 전환" : "결과(B) 재생 중 - 눌러서 원본(A)로 전환"; $("ab").setAttribute("aria-pressed", abSide === "B"); };
+$("ab").onclick = () => {
+  const from = abSide === "A" ? $("orig") : $("out"), to = abSide === "A" ? $("out") : $("orig");
+  const off = Math.max(0, from === $("orig") ? from.currentTime - proc.start : from.currentTime);
+  from.pause(); abSide = abSide === "A" ? "B" : "A"; setAb();
+  to.currentTime = to === $("orig") ? proc.start + off : off;
+  to.play(); // ponytail: original is not stopped at 처리 구간 end; MediaRecorder webm may seek imprecisely
+
+};
+</script>
+</body>
+</html>
