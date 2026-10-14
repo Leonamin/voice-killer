@@ -12,3 +12,4 @@ scope: "references"
 - [대화 출처와 미확인 사항](conversation-source.md)
 
 - [스티브 잡스 발표 억제 실험](jobs-experiment.md)
+- [음성 변환 모델 스파이크](vc-spike.md)

@@ -12,3 +12,4 @@ scope: "decisions"
 
 - [ADR 002: REAL-TSE와 강한 마스킹](002-real-tse-offline-baseline.md)
 - [ADR 003: 웹 데모 범위와 책임 분리](003-web-demo-scope.md)
+- [ADR 004: 음성 변환에 Seed-VC 사용](004-voice-conversion-model.md)
