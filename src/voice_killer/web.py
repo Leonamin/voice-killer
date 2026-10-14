@@ -1,14 +1,16 @@
 """Local web demo: POST /api/process crops, extracts or removes a speaker."""
 import argparse
 import contextlib
+import asyncio
 import io
+import json
 import subprocess
 import tempfile
 import threading
 from pathlib import Path
 import numpy as np
 import soundfile as sf
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, Response
 from . import engine
 
@@ -80,6 +82,53 @@ def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float 
     buf = io.BytesIO()
     sf.write(buf, out.astype(np.float32), SR, format="WAV", subtype="FLOAT")
     return Response(buf.getvalue(), media_type="audio/wav")
+
+
+MAX_BLOCK = 4 * SR
+
+
+def pcm(data, max_n, name):
+    if len(data) % 4 or not data:
+        raise ValueError(f"{name} 길이가 올바르지 않습니다")
+    x = np.frombuffer(data, dtype="<f4").astype(np.float32)
+    if len(x) > max_n or not np.isfinite(x).all():
+        raise ValueError(f"{name}이(가) 너무 길거나 유효하지 않은 값이 있습니다")
+    return x
+
+
+def infer(sup, block):
+    with lock:  # shared with /api/process
+        return sup.push(block)
+
+
+@app.websocket("/ws/stream")
+async def stream(ws: WebSocket):
+    await ws.accept()
+    try:
+        try:
+            n = json.loads(await ws.receive_text())["enroll_seconds"]
+            if isinstance(n, bool) or not isinstance(n, (int, float)) or not np.isfinite(n) or not 1 <= n <= 30:
+                raise ValueError("enroll_seconds는 1~30이어야 합니다")
+            enroll = pcm(await ws.receive_bytes(), 30 * SR, "등록 음성")
+            if abs(len(enroll) - n * SR) > SR / 10:
+                raise ValueError("등록 음성 길이가 enroll_seconds와 맞지 않습니다")
+            engine.check_enrollment(enroll)
+            sup = await asyncio.to_thread(lambda: engine.StreamSuppressor(enroll, engine.load_extractor()))
+        except (ValueError, KeyError, TypeError) as e:  # json errors are ValueError
+            await ws.send_text(json.dumps({"error": f"잘못된 요청: {e}"}, ensure_ascii=False))
+            await ws.close()
+            return
+        await ws.send_text('{"ready": true}')
+        while True:
+            try:
+                block = pcm(await ws.receive_bytes(), MAX_BLOCK, "블록")
+            except (ValueError, KeyError) as e:  # KeyError: text frame instead of binary
+                await ws.send_text(json.dumps({"error": f"잘못된 블록: {e}"}, ensure_ascii=False))
+                await ws.close()
+                return
+            await ws.send_bytes((await asyncio.to_thread(infer, sup, block)).astype("<f4").tobytes())
+    except (WebSocketDisconnect, RuntimeError):  # RuntimeError: receive after the client already closed
+        pass  # ponytail: a block mid-inference at disconnect still finishes before the lock frees
 
 
 def main():

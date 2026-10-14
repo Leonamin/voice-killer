@@ -10,7 +10,7 @@ requires-python = ">=3.11,<3.12"
 dependencies = ["numpy", "scipy", "soundfile", "torch==2.7.1", "torchaudio==2.7.1", "pyyaml", "einops"]
 
 [project.optional-dependencies]
-web = ["fastapi==0.143.0", "uvicorn==0.54.0", "python-multipart==0.0.32", "httpx==0.28.1"]
+web = ["fastapi==0.143.0", "uvicorn==0.54.0", "python-multipart==0.0.32", "httpx==0.28.1", "websockets==17.2"]
 research = ["faster-whisper==1.2.1", "gdown", "yt-dlp", "pytest"]
 
 [project.scripts]

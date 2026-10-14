@@ -38,3 +38,7 @@ float WAV를 사용해 파일 저장 과정의 숨은 정규화·클리핑을 �
 ## 엔진 API
 
 `voice_killer.engine`이 CLI와 웹 서버가 함께 쓰는 진입점이다. `load_extractor`는 `lru_cache`로 모델을 한 번만 로드한다. `StreamSuppressor.push`는 과거 문맥을 붙여 블록 하나를 처리하고 같은 길이를 돌려준다. `voice-killer-stream`도 이 클래스를 쓴다. 파일 CLI는 처리 시간 기록이 필요해 `TargetExtractor.extract`를 직접 호출한다.
+
+## 웹 실시간 경로
+
+브라우저는 16 kHz AudioContext와 AudioWorklet으로 마이크 또는 파일 재생 신호를 블록 단위로 `/ws/stream`에 보낸다. 서버는 연결마다 `StreamSuppressor`를 만들고, 파일 처리와 같은 전역 잠금 안에서 스레드로 추론한다. 받은 블록은 `nextTime`을 이어 붙여 재생한다. 마이크의 에코 제거·잡음 억제·자동 이득은 끈다.
