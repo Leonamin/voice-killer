@@ -34,3 +34,7 @@ float WAV를 사용해 파일 저장 과정의 숨은 정규화·클리핑을 �
 ## 스트리밍
 
 `voice-killer-stream`은 stdin/stdout에 16 kHz 모노 little-endian float32 PCM을 주고받는다. 2초 block과 과거 2초 문맥을 사용한다. 미래 block을 기다리지는 않지만 block 내부 전체를 참조하는 비인과 모델이므로 최소 버퍼 지연이 있다. 마이크·헤드폰 I/O 및 실시간 운영체제 지연은 별도 후속 검증이다.
+
+## 엔진 API
+
+`voice_killer.engine`이 CLI와 웹 서버가 함께 쓰는 진입점이다. `load_extractor`는 `lru_cache`로 모델을 한 번만 로드한다. `StreamSuppressor.push`는 과거 문맥을 붙여 블록 하나를 처리하고 같은 길이를 돌려준다. `voice-killer-stream`도 이 클래스를 쓴다. 파일 CLI는 처리 시간 기록이 필요해 `TargetExtractor.extract`를 직접 호출한다.

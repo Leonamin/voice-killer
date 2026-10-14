@@ -26,14 +26,18 @@ timestamp: 2026-10-14
 
 모든 오디오는 **16 kHz 모노 float32**로 주고받는다.
 
-엔진 (`voice_killer` 패키지):
+엔진 (`voice_killer.engine` 모듈):
 
 ```python
-extract(mixture, enroll) -> target          # ①
-remove(mixture, enroll, strength=1.0) -> out  # ②
-convert(source, reference) -> out           # ③
-StreamSuppressor(enroll, block_seconds=1.0).push(block) -> block  # ④
+load_extractor() -> TargetExtractor           # lru_cache: 서버는 모델을 한 번만 로드
+check_enrollment(enroll)                      # 1초 미만·무음이면 ValueError
+extract(mixture, enroll, extractor=None) -> target            # ①
+remove(mixture, enroll, strength=1.0, extractor=None) -> out  # ②
+convert(source, reference) -> out             # ③ (트랙 D)
+StreamSuppressor(enroll, context_seconds=2.0).push(block) -> block  # ④
 ```
+
+블록 길이는 호출하는 쪽이 정한다. `push`는 받은 블록과 같은 길이를 돌려준다.
 
 HTTP:
 
@@ -53,7 +57,8 @@ WebSocket `/ws/stream`:
 
 - `cli.main()`의 처리를 `extract`와 `remove` 함수로 꺼낸다.
 - `stream.py`의 반복 처리를 `StreamSuppressor`로 꺼낸다. CLI 동작은 그대로 둔다.
-- 완료 기준: 기존 테스트 통과, 잡스 70초 결과 해시 동일.
+- 완료 기준: 기존 테스트 통과, 잡스 70초 결과 샘플 동일.
+- 상태: 2026-10-14 완료. `src/voice_killer/engine.py`. CLI 출력 3개는 샘플 최대 차이 0, 스트림 PCM은 바이트 동일. WAV 파일 해시는 libsndfile PEAK 청크의 생성 시각 때문에 매번 달라지므로 회귀 비교는 디코딩한 샘플로 한다.
 - B와 C는 A가 끝나기 전에도 계약대로 스텁을 두고 시작할 수 있다.
 
 ### B. 웹: 파일 처리 (①②, 이후 ③ 탭)

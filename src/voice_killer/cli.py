@@ -6,6 +6,7 @@ import time
 import numpy as np
 import soundfile as sf
 from .dsp import resample, suppress
+from .engine import DEFAULT_MODEL_DIR, DEFAULT_VENDOR_DIR, check_enrollment
 
 
 def sha256(path):
@@ -36,8 +37,8 @@ def main():
     parser.add_argument("input", type=Path)
     parser.add_argument("--enroll", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--model-dir", type=Path, default=Path("models/real-tse/spk_emb_100"))
-    parser.add_argument("--vendor-dir", type=Path, default=Path("vendor/wesep-real-tse"))
+    parser.add_argument("--model-dir", type=Path, default=DEFAULT_MODEL_DIR)
+    parser.add_argument("--vendor-dir", type=Path, default=DEFAULT_VENDOR_DIR)
     parser.add_argument("--method", choices=["mask", "subtract"], default="mask")
     parser.add_argument("--strength", type=float, default=1.0)
     parser.add_argument("--mask-power", type=float, default=4.0)
@@ -75,7 +76,9 @@ def main():
     begin = time.perf_counter()
     mixture, source_rate = read_audio(args.input, args.start, args.duration)
     enrollment, _ = read_audio(args.enroll)
-    if len(enrollment) < 16000 or np.max(np.abs(enrollment)) < 1e-6:
+    try:
+        check_enrollment(enrollment)
+    except ValueError:
         parser.error("enrollment must contain at least 1 second; use a clean 5–10 second segment")
     from .model import TargetExtractor
     extractor = TargetExtractor(args.model_dir, args.vendor_dir, args.device, args.threads)
