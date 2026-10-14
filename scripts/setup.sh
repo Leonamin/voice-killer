@@ -18,4 +18,9 @@ fi
 test "$(git -C vendor/wesep-real-tse rev-parse HEAD)" = "$revision"
 test -z "$(git -C vendor/wesep-real-tse status --porcelain)"
 .venv/bin/python scripts/download_model.py
+if command -v npm >/dev/null; then
+    (cd web && npm ci && npm run build)
+else
+    printf '%s\n' 'npm not found: install Node.js, then run: cd web && npm ci && npm run build'
+fi
 printf '%s\n' 'Setup complete. Run .venv/bin/voice-killer --help'

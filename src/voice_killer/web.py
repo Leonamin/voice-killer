@@ -12,6 +12,7 @@ import numpy as np
 import soundfile as sf
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, Response
+from fastapi.staticfiles import StaticFiles
 from . import engine
 
 SR = 16000
@@ -29,9 +30,17 @@ async def lifespan(_):
 app = FastAPI(lifespan=lifespan)
 
 
+DIST = engine.ROOT / "web" / "dist"
+if (DIST / "assets").is_dir():
+    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+
+
 @app.get("/", response_class=HTMLResponse)
 def index():
-    return (Path(__file__).with_name("web.html")).read_text(encoding="utf-8")
+    page = DIST / "index.html"
+    if not page.is_file():
+        return HTMLResponse("프런트엔드가 빌드되지 않았습니다. cd web && npm ci && npm run build 를 실행하세요.", status_code=503)
+    return page.read_text(encoding="utf-8")
 
 
 def decode(upload):

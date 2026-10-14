@@ -1,0 +1,100 @@
+/* DESIGN.md 토큰 (단일 원본). 값을 바꾸려면 DESIGN.md를 먼저 바꾼다. */
+:root {
+  --vk-bg: #0b0d10;
+  --vk-surface: #14171c;
+  --vk-surface-subtle: #1b1f26;
+  --vk-surface-raised: #222731;
+  --vk-border: #2a303a;
+  --vk-control-border: #4a5263;
+  --vk-text: #f2f4f7;
+  --vk-text-muted: #9aa3b2;
+  --vk-on-accent: #0b0d10;
+  --vk-primary: #ff7a1a;
+  --vk-primary-hover: #ff9445;
+  --vk-primary-soft: #3a2112;
+  --vk-live: #39ff88;
+  --vk-live-hover: #7bffae;
+  --vk-live-soft: #11331f;
+  --vk-danger: #ff5c7a;
+  --vk-danger-soft: #3d1620;
+  --vk-warning: #ffc53d;
+  --vk-warning-soft: #3a2e10;
+
+  --vk-font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --vk-display-size: 32px;
+  --vk-display-weight: 800;
+  --vk-display-line: 1.2;
+  --vk-display-spacing: -0.02em;
+  --vk-title-size: 20px;
+  --vk-title-weight: 700;
+  --vk-title-line: 1.35;
+  --vk-body-size: 15px;
+  --vk-body-weight: 400;
+  --vk-body-line: 1.55;
+  --vk-label-size: 13px;
+  --vk-label-weight: 600;
+  --vk-label-line: 1.4;
+  --vk-metric-size: 24px;
+  --vk-metric-weight: 700;
+  --vk-metric-line: 1.2;
+
+  --vk-rounded-sm: 6px;
+  --vk-rounded-md: 10px;
+  --vk-rounded-lg: 16px;
+  --vk-rounded-full: 999px;
+
+  --vk-space-xs: 4px;
+  --vk-space-sm: 8px;
+  --vk-space-md: 12px;
+  --vk-space-lg: 16px;
+  --vk-space-xl: 24px;
+  --vk-space-2xl: 32px;
+  --vk-control: 40px;
+  --vk-rail: 248px;
+
+  /* 발광: 강조색 약 35% 불투명도 (기본 CTA 전용) */
+  --vk-glow-primary: 0 0 16px #ff7a1a59;
+}
+
+/* Goodcase 토큰 연결. tokens.css의 :root와 [data-color-mode] 규칙보다 구체적으로 선언한다. */
+:root,
+:root[data-color-mode="dark"] {
+  color-scheme: dark;
+  --gc-font-sans: var(--vk-font);
+  --gc-bg: var(--vk-bg);
+  --gc-surface: var(--vk-surface);
+  --gc-surface-subtle: var(--vk-surface-subtle);
+  --gc-text: var(--vk-text);
+  --gc-text-muted: var(--vk-text-muted);
+  --gc-border: var(--vk-border);
+  --gc-control-border: var(--vk-control-border);
+  --gc-interactive-hover: #ffffff12;
+  --gc-progress-track: var(--vk-surface-raised);
+  --gc-on-accent: var(--vk-on-accent);
+  --gc-accent: var(--vk-primary);
+  --gc-accent-hover: var(--vk-primary-hover);
+  --gc-accent-soft: var(--vk-primary-soft);
+  --gc-danger: var(--vk-danger);
+  --gc-danger-soft: var(--vk-danger-soft);
+  --gc-success: var(--vk-live);
+  --gc-success-soft: var(--vk-live-soft);
+  --gc-warning: var(--vk-warning);
+  --gc-warning-soft: var(--vk-warning-soft);
+  --gc-overlay: #000000b3;
+  --gc-focus: var(--vk-live);
+  --gc-radius-sm: var(--vk-rounded-sm);
+  --gc-radius: var(--vk-rounded-md);
+  --gc-radius-lg: var(--vk-rounded-lg);
+  --gc-shadow: 0 12px 40px #00000099;
+  --gc-space-1: var(--vk-space-xs);
+  --gc-space-2: var(--vk-space-sm);
+  --gc-space-3: var(--vk-space-md);
+  --gc-space-4: var(--vk-space-lg);
+  --gc-space-6: var(--vk-space-xl);
+  --gc-space-8: var(--vk-space-2xl);
+  --gc-control-height: var(--vk-control);
+  --gc-text-sm: var(--vk-label-size);
+  --gc-text-base: var(--vk-body-size);
+  --gc-text-lg: var(--vk-title-size);
+  --gc-text-title: var(--vk-display-size);
+}
