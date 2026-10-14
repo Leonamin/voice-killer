@@ -17,3 +17,4 @@ timestamp: 2026-10-14
 - 실측·결정: 트랙 D 스파이크로 Seed-VC와 OpenVoice v2를 비교하고 Seed-VC 별도 프로세스 사용을 결정했다 (ADR 004).
 - 구현: 트랙 C 실시간 제거(`/ws/stream`과 웹 화면)를 추가했다. 1초 블록 서버 왕복 평균 692 ms다.
 - 구현: 트랙 D 음성 변환(Seed-VC worker, `engine.convert`, 웹 변환 모드)을 추가했다. 웹 경로 화자 유사도가 스파이크와 일치했다.
+- 변경: 다른 기기 접속을 위해 `--host`와 HTTPS 옵션을 추가했다(ADR 003 갱신). 쓰지 않는 OpenVoice 환경과 Seed-VC 실시간 전용 가중치를 삭제했다.

@@ -145,4 +145,9 @@ def main():
     import uvicorn
     ap = argparse.ArgumentParser()
     ap.add_argument("port", nargs="?", type=int, default=8000)
-    uvicorn.run(app, host="127.0.0.1", port=ap.parse_args().port)
+    ap.add_argument("--host", default="127.0.0.1", help="0.0.0.0 to accept other devices (no auth)")
+    # Browsers allow the mic and AudioWorklet only on https or localhost.
+    ap.add_argument("--ssl-certfile")
+    ap.add_argument("--ssl-keyfile")
+    args = ap.parse_args()
+    uvicorn.run(app, host=args.host, port=args.port, ssl_certfile=args.ssl_certfile, ssl_keyfile=args.ssl_keyfile)

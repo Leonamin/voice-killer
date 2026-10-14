@@ -63,7 +63,17 @@ bash scripts/setup.sh
 .venv/bin/voice-killer-web   # http://127.0.0.1:8000
 ```
 
-파일을 올리거나 녹음한 뒤 파형에서 처리 구간과 참조 구간(대상이 혼자 말하는 5~10초)을 지정하고 추출·제거를 실행한다. 업로드는 ffmpeg로 16 kHz 모노로 변환하므로 mp3·mp4·webm도 받는다. 로컬(127.0.0.1)에서만 열리며 한 번에 한 요청만 처리한다. '실시간 제거'는 마이크나 파일의 처리 구간을 1·2초 블록으로 서버에 보내 바로 재생한다. 이 PC에서 1초 블록의 추정 총지연은 약 1.6초다. 스피커 되먹임을 막으려면 헤드폰을 쓴다. 수 분 이상의 고음질 원본은 브라우저 파형 표시가 멈출 수 있으니 시연용으로 잘라 쓴다.
+파일을 올리거나 녹음한 뒤 파형에서 처리 구간과 참조 구간(대상이 혼자 말하는 5~10초)을 지정하고 추출·제거를 실행한다. 업로드는 ffmpeg로 16 kHz 모노로 변환하므로 mp3·mp4·webm도 받는다. 기본은 로컬(127.0.0.1)에서만 열리며 한 번에 한 요청만 처리한다.
+
+다른 기기에서 접속하려면 `--host 0.0.0.0`을 쓴다. 브라우저는 HTTPS나 localhost에서만 마이크를 허용하므로 자체 서명 인증서와 함께 실행한다. 인증이 없으므로 같은 네트워크의 누구나 쓸 수 있다.
+
+```bash
+mkdir -p .cache/tls && openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj /CN=voice-killer \
+  -addext "subjectAltName=IP:<이 PC의 IP>,IP:127.0.0.1" -keyout .cache/tls/key.pem -out .cache/tls/cert.pem
+.venv/bin/voice-killer-web --host 0.0.0.0 --ssl-certfile .cache/tls/cert.pem --ssl-keyfile .cache/tls/key.pem
+```
+
+접속하는 기기에서 인증서 경고를 한 번 수락해야 한다. '실시간 제거'는 마이크나 파일의 처리 구간을 1·2초 블록으로 서버에 보내 바로 재생한다. 이 PC에서 1초 블록의 추정 총지연은 약 1.6초다. 스피커 되먹임을 막으려면 헤드폰을 쓴다. 수 분 이상의 고음질 원본은 브라우저 파형 표시가 멈출 수 있으니 시연용으로 잘라 쓴다.
 
 ### 음성 변환
 
