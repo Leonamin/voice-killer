@@ -42,3 +42,7 @@ float WAV를 사용해 파일 저장 과정의 숨은 정규화·클리핑을 �
 ## 웹 실시간 경로
 
 브라우저는 16 kHz AudioContext와 AudioWorklet으로 마이크 또는 파일 재생 신호를 블록 단위로 `/ws/stream`에 보낸다. 서버는 연결마다 `StreamSuppressor`를 만들고, 파일 처리와 같은 전역 잠금 안에서 스레드로 추론한다. 받은 블록은 `nextTime`을 이어 붙여 재생한다. 마이크의 에코 제거·잡음 억제·자동 이득은 끈다.
+
+## 음성 변환 worker
+
+`engine.convert`는 처음 호출할 때 `.venv-seedvc/bin/python scripts/vc_worker.py`를 띄우고, 죽었으면 다시 띄운다. stdin에 JSON 한 줄(source, reference, output WAV 경로, steps)을 보내고 stdout에서 JSON 한 줄 응답을 받는다. stdout은 응답 전용이고 라이브러리 출력은 stderr로 보낸다. Seed-VC `inference.main`은 호출마다 모델을 다시 로드하므로 worker가 `load_models`를 이미 로드한 모델로 바꿔 끼운다. 출력 22.05 kHz는 16 kHz 모노로 리샘플한다.

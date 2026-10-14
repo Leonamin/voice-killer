@@ -1,9 +1,15 @@
 """Small engine API shared by the CLIs and the web server."""
+import atexit
 import functools
+import json
+import subprocess
+import tempfile
+import threading
 from pathlib import Path
 import numpy as np
+import soundfile as sf
 import torch
-from .dsp import suppress
+from .dsp import resample, suppress
 
 DEFAULT_MODEL_DIR = Path("models/real-tse/spk_emb_100")
 DEFAULT_VENDOR_DIR = Path("vendor/wesep-real-tse")
@@ -56,3 +62,72 @@ class StreamSuppressor:
             raise RuntimeError("invalid stream output")
         self.history = joined[-self.context:] if self.context else np.empty(0, dtype=np.float32)
         return filtered
+
+
+ROOT = Path(__file__).resolve().parents[2]
+VC_PYTHON = ROOT / ".venv-seedvc/bin/python"
+MAX_VC_SOURCE, MAX_VC_REFERENCE = 60, 30  # seconds
+_worker = None
+atexit.register(lambda: _worker and _worker.kill())
+_worker_lock = threading.Lock()
+_SETUP_HINT = "음성 변환 worker를 사용할 수 없습니다. scripts/setup_vc.sh를 실행하세요"
+
+
+def vc_available():
+    return VC_PYTHON.exists() and (ROOT / "vendor/seed-vc").is_dir()
+
+
+def _get_worker():
+    global _worker
+    if _worker and _worker.poll() is None:
+        return _worker
+    if not vc_available():
+        raise RuntimeError(_SETUP_HINT)
+    p = subprocess.Popen([str(VC_PYTHON), str(ROOT / "scripts/vc_worker.py")], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, text=True, cwd=ROOT)
+    # ponytail: stderr drained by a thread that waits for READY then keeps discarding; no log file
+    ready = threading.Event()
+
+    def drain():
+        for line in p.stderr:
+            if line.strip() == "READY":
+                ready.set()
+    threading.Thread(target=drain, daemon=True).start()
+    while not ready.wait(0.5):
+        if p.poll() is not None:
+            raise RuntimeError(f"{_SETUP_HINT} (worker가 시작 중 종료됨)")
+    _worker = p
+    return p
+
+
+def convert(source, reference, steps=10):
+    """Seed-VC: make `source` sound like `reference`. 16 kHz mono float32 in and out."""
+    source, reference = (np.asarray(x, dtype=np.float32) for x in (source, reference))
+    check_enrollment(reference)
+    if len(reference) > MAX_VC_REFERENCE * 16000:
+        raise ValueError(f"reference must be at most {MAX_VC_REFERENCE} seconds")
+    if not len(source) or len(source) > MAX_VC_SOURCE * 16000:
+        raise ValueError(f"source must be 0-{MAX_VC_SOURCE} seconds")
+    if not (np.isfinite(source).all() and np.isfinite(reference).all()):
+        raise ValueError("non-finite input PCM")
+    if steps < 1:
+        raise ValueError("steps must be positive")
+    with _worker_lock, tempfile.TemporaryDirectory() as d:
+        paths = {k: f"{d}/{k}.wav" for k in ("source", "reference", "output")}
+        sf.write(paths["source"], source, 16000)
+        sf.write(paths["reference"], reference, 16000)
+        p = _get_worker()
+        try:
+            p.stdin.write(json.dumps({**paths, "steps": int(steps)}) + "\n")
+            p.stdin.flush()
+            line = p.stdout.readline()
+        except OSError:
+            line = ""
+        if not line:
+            raise RuntimeError("음성 변환 worker가 종료되었습니다. 다시 시도하세요")
+        reply = json.loads(line)
+        if not reply["ok"]:
+            raise RuntimeError("음성 변환 실패: " + reply["error"])
+        out, sr = sf.read(paths["output"], dtype="float32")
+    out = out.mean(axis=1) if out.ndim > 1 else out
+    return resample(out, sr, 16000).astype(np.float32)

@@ -63,22 +63,32 @@ def crop(x, start, end, name, max_seconds=None):
 
 @app.post("/api/process")
 def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float = Form(...), ref: UploadFile | None = File(None),
-            ref_start: float = Form(0.0), ref_end: float = Form(...), mode: str = Form("remove"), strength: float = Form(1.0)):
-    if mode == "convert":
-        raise HTTPException(501, "음성 변환은 아직 구현되지 않았습니다")
-    if mode not in ("extract", "remove"):
+            ref_start: float = Form(0.0), ref_end: float = Form(...), mode: str = Form("remove"), strength: float = Form(1.0), steps: int = Form(10)):
+    if mode not in ("extract", "remove", "convert"):
         raise HTTPException(400, "mode는 extract, remove, convert 중 하나여야 합니다")
     if not 0 <= strength <= 1:  # also rejects NaN
         raise HTTPException(400, "strength는 0~1이어야 합니다")
+    if mode == "convert" and steps not in (4, 10):
+        raise HTTPException(400, "steps는 4 또는 10이어야 합니다")
     x = decode(audio)
     mix = crop(x, start, end, "처리", MAX_SECONDS)
+    if mode == "convert" and len(mix) > engine.MAX_VC_SOURCE * SR:
+        raise HTTPException(400, f"변환할 구간은 최대 {engine.MAX_VC_SOURCE}초입니다")
     enroll = crop(decode(ref) if ref and ref.filename else x, ref_start, ref_end, "참조")
     try:
         engine.check_enrollment(enroll)
     except ValueError as e:
         raise HTTPException(400, f"참조 구간: {e}")
+    if mode == "convert" and len(enroll) > engine.MAX_VC_REFERENCE * SR:
+        raise HTTPException(400, f"참조 구간은 최대 {engine.MAX_VC_REFERENCE}초입니다")
     with lock:
-        out = engine.extract(mix, enroll) if mode == "extract" else engine.remove(mix, enroll, strength)
+        if mode == "convert":
+            try:
+                out = engine.convert(mix, enroll, steps)
+            except RuntimeError as e:
+                raise HTTPException(503, str(e))
+        else:
+            out = engine.extract(mix, enroll) if mode == "extract" else engine.remove(mix, enroll, strength)
     buf = io.BytesIO()
     sf.write(buf, out.astype(np.float32), SR, format="WAV", subtype="FLOAT")
     return Response(buf.getvalue(), media_type="audio/wav")

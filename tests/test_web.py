@@ -16,8 +16,9 @@ def test_end_out_of_range_is_400(tmp_path):
     assert r.status_code == 400 and "처리" in r.json()["detail"]
 
 
-def test_convert_is_501(tmp_path):
-    assert post(tmp_path, end=2, mode="convert").status_code == 501
+def test_convert_bad_steps_is_400(tmp_path):
+    r = post(tmp_path, end=2, mode="convert", steps=7)
+    assert r.status_code == 400 and "steps" in r.json()["detail"]
 
 
 def test_ws_invalid_enroll_seconds_sends_error():

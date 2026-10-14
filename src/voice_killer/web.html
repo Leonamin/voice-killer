@@ -37,14 +37,17 @@ audio{width:100%}
   <label><input type="radio" name="mode" value="extract"> 추출</label>
   <label><input type="radio" name="mode" value="remove" checked> 제거</label>
   <label><input type="radio" name="mode" value="convert"> 변환</label>
+  <label id="stepwrap" hidden>단계 <select id="steps"><option value="10">품질 (10)</option><option value="4">빠름 (4)</option></select></label>
   <label id="strwrap">강도 <input type="range" id="strength" min="0" max="1" step="0.05" value="1"> <output id="strout">1.00</output></label>
  </div>
+ <p id="convhint" hidden>처리 구간 = 바꿀 목소리, 참조 = 닮을 목소리. 합성 음성이 만들어지며 음원 길이의 약 2~3배가 걸릴 수 있습니다.</p>
  <div class="row"><button id="run" type="button" disabled>실행</button><span id="status" role="status"></span></div>
  <div id="error" role="alert"></div>
 </fieldset>
-<fieldset id="result" hidden><legend>4. 결과</legend>
+<fieldset id="result" hidden><legend id="rlegend">4. 결과</legend>
+ <p id="synth" hidden><b>합성 음성</b> - AI로 변환된 목소리입니다.</p>
  <audio id="out" controls></audio>
- <div class="row"><button id="ab" type="button" aria-pressed="false">A/B 전환</button><a id="dl" download="result.wav">다운로드</a></div>
+ <div class="row"><button id="ab" type="button" aria-pressed="false">A/B 전환</button><a id="dl" download="result.wav">다운로드</a><button id="useref" type="button" hidden>이 결과를 참조로 쓰기</button></div>
  <audio id="orig" hidden></audio>
 </fieldset>
 <fieldset id="live"><legend>5. 실시간 제거</legend>
@@ -66,7 +69,7 @@ audio{width:100%}
 import WaveSurfer from "https://unpkg.com/wavesurfer.js@7.8.6/dist/wavesurfer.esm.js";
 import RegionsPlugin from "https://unpkg.com/wavesurfer.js@7.8.6/dist/plugins/regions.esm.js";
 const $ = id => document.getElementById(id);
-let main, ref, proc, refReg, mainBlob, refBlob, resultUrl, origUrl, running = false;
+let main, ref, proc, refReg, mainBlob, refBlob, resultUrl, origUrl, resultBlob, running = false;
 
 function make(el, blob, ready) {
   const regions = RegionsPlugin.create(), ws = WaveSurfer.create({container: el, height: 80, url: URL.createObjectURL(blob), plugins: [regions]});
@@ -97,6 +100,7 @@ const regOf = () => refBlob ? ref.reg : refReg;
 
 $("file").onchange = e => e.target.files[0] && loadMain(e.target.files[0]);
 $("reffile").onchange = e => loadRef(e.target.files[0] || null);
+$("useref").onclick = () => { $("reffile").value = ""; loadRef(resultBlob); };
 $("refclear").onclick = () => { $("reffile").value = ""; loadRef(null); };
 $("playProc").onclick = () => play(main.ws, proc);
 $("playRef").onclick = () => refBlob ? play(ref.ws, ref.reg) : play(main.ws, refReg);
@@ -113,22 +117,24 @@ $("rec").onclick = async () => {
   } catch (err) { $("error").textContent = "마이크를 사용할 수 없습니다: " + err.message; }
 };
 
-const sync = () => $("strwrap").hidden = document.querySelector("input[name=mode]:checked").value !== "remove";
+const curMode = () => document.querySelector("input[name=mode]:checked").value;
+const sync = () => { $("strwrap").hidden = curMode() !== "remove"; $("stepwrap").hidden = $("convhint").hidden = curMode() !== "convert"; };
 document.querySelectorAll("input[name=mode]").forEach(r => r.onchange = sync); sync();
 $("strength").oninput = e => $("strout").textContent = (+e.target.value).toFixed(2);
 
 $("run").onclick = async () => {
   if (running) return;
-  running = true; $("run").disabled = true; $("status").textContent = "처리 중…"; $("error").textContent = "";
+  running = true; $("run").disabled = true; const m = curMode(); $("status").textContent = m === "convert" ? "변환 중… 음원 길이의 2~3배가 걸릴 수 있습니다" : "처리 중…"; $("error").textContent = "";
   try {
     const fd = new FormData(), rr = regOf();
     fd.append("audio", mainBlob, "input"); fd.append("start", proc.start); fd.append("end", proc.end);
     if (refBlob) fd.append("ref", refBlob, "ref");
     fd.append("ref_start", rr.start); fd.append("ref_end", rr.end);
-    fd.append("mode", document.querySelector("input[name=mode]:checked").value); fd.append("strength", $("strength").value);
+    fd.append("mode", m); fd.append("steps", $("steps").value); fd.append("strength", $("strength").value);
     const r = await fetch("/api/process", {method: "POST", body: fd});
     if (!r.ok) { let m = r.statusText; try { const j = await r.json(); m = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail); } catch {} throw new Error(`${r.status}: ${m}`); }
     const blob = await r.blob();
+    resultBlob = blob; $("synth").hidden = m !== "convert"; $("useref").hidden = m !== "extract";
     if (resultUrl) URL.revokeObjectURL(resultUrl);
     resultUrl = URL.createObjectURL(blob);
     $("out").src = resultUrl; $("dl").href = resultUrl; $("result").hidden = false;
