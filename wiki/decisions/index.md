@@ -11,3 +11,4 @@ scope: "decisions"
 - [ADR 001: 특정 화자 억제를 목표로 설정](001-target-speaker-suppression.md)
 
 - [ADR 002: REAL-TSE와 강한 마스킹](002-real-tse-offline-baseline.md)
+- [ADR 003: 웹 데모 범위와 책임 분리](003-web-demo-scope.md)
