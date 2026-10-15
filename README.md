@@ -1,73 +1,44 @@
 # Voice Killer
 
-등록한 화자의 발화를 억제하고 주변 소리를 남기는 오프라인 오디오 변환 도구. 스티브 잡스의 2007년 첫 아이폰 발표를 실제로 변환한 연구 PoC다.
+특정 인물의 목소리만 골라 **추출·제거·변환**하는 오디오 도구다. 대상이 혼자 말하는 짧은 참조 음성(5~10초)을 주면, 도구가 이름이 아니라 그 목소리의 특징을 기준으로 처리한다. 디지털미디어원리 수업 프로젝트이며, 스티브 잡스의 2007년 아이폰 발표로 실험했다.
 
-**REAL-TSE 사전학습 모델 + 등록 음성 + 시간·주파수 마스킹**을 사용한다. 발화 구간 전체를 음소거하지 않는다. 입력은 libsndfile이 읽을 수 있는 WAV/FLAC 등의 음원이며, 출력은 **16 kHz 모노 float WAV**다. 영상·MP3 등은 ffmpeg로 WAV 변환 후 입력한다.
+| 기능 | 하는 일 | 방식 |
+| --- | --- | --- |
+| 추출 | 섞인 소리에서 참조 인물의 목소리만 남긴다 | REAL-TSE 대상 화자 추출 |
+| 제거 | 참조 인물의 목소리만 지우고 주변 소리는 남긴다 | 추출 결과로 시간·주파수 마스킹 |
+| 변환 | 내 목소리를 참조 음원의 목소리로 바꾼다 | Seed-VC zero-shot 변환 |
+| 실시간 제거 | 마이크 입력에서 참조 인물 목소리를 바로 지운다 | 1·2초 블록 스트리밍 |
 
-## 설치
+모든 처리는 이 PC의 CPU에서 로컬로 실행한다. 첫 설치 때만 모델을 내려받는다.
 
-검증 환경: macOS 26.3, Apple M4 Max, Python 3.11, PyTorch 2.7.1 CPU. `uv`, Git, ffmpeg가 필요하다.
+## 빠른 시작
 
-```bash
-cd ~/dev/voice-killer
-bash scripts/setup.sh
-```
-
-전용 `.venv`에 고정 의존성을 설치하고, 고정 revision의 공개 연구 코드와 공식 체크포인트 묶음(약 1.05 GB)을 내려받는다. 모델 파일의 SHA-256을 검사한다. 첫 다운로드에는 인터넷이 필요하며 이후 변환은 로컬에서 수행한다. 이미 설치된 작업 환경에서도 바로 아래 명령을 실행할 수 있다.
-
-## 파일 변환
+필요한 것: Linux 또는 macOS, [uv](https://docs.astral.sh/uv/), Git, ffmpeg, Node.js 20.19 이상(웹 빌드용).
 
 ```bash
-.venv/bin/voice-killer input.wav \
-  --enroll target-speaker.wav \
-  --output outputs/filtered.wav
-```
-
-등록 음성은 대상이 혼자 말하는 별도의 깨끗한 5~10초 구간을 권장한다. 도구는 사람의 이름을 아는 것이 아니라 등록 음성의 특징을 조건으로 사용한다.
-
-함께 생성되는 파일:
-
-- `filtered.wav`: 억제 결과
-- `filtered.original.wav`: 동일 구간·16 kHz 모노 원본 비교본
-- `filtered.target.wav`: 모델이 추정한 대상 화자
-- `filtered.json`: 입력·모델·출력 해시, 옵션, 구간과 처리 시간
-
-출력을 자동 음량 정규화하지 않는다. 기존 결과는 `--force` 없이 덮어쓰지 않는다. 원본과 등록 음성 덮어쓰기는 차단한다.
-
-## 잡스 발표 데모 재현
-
-```bash
-.venv/bin/python scripts/prepare_demo.py
-.venv/bin/voice-killer data/source/iphone-2007.wav \
-  --enroll data/jobs-enroll.wav \
-  --start 132 --duration 70 \
-  --output outputs/reveal.wav
-
-# 확보한 10분 19초 소개 영상 전체
-.venv/bin/voice-killer data/source/iphone-2007.wav \
-  --enroll data/jobs-enroll.wav \
-  --output outputs/iphone-2007-final.wav
-```
-
-[출처 영상](https://www.youtube.com/watch?v=MnrJzXM7a6o)은 전체 Macworld 행사 중 아이폰 소개 발췌본이다. 등록 구간은 12.4~19.4초, 주요 자연 평가 구간은 38~68초와 132~202초다. 전체 변환에는 등록 구간도 포함되므로 독립 평가에는 사용하지 않는다. 실제 결과 파일은 Git에서 제외된 `outputs/`에 있다.
-
-## 강도와 방식
-
-기본값은 `--method mask --mask-power 4 --hard-threshold 0.65 --strength 1`이다. 대상 성분 비율이 0.65 이상인 주파수 bin은 완전히 차단한다. `--hard-threshold 1`로 이 보정을 끄고 `--mask-power 1`이나 `2`를 쓰면 부드럽지만 말이 더 남는다. `--strength 0`은 모델 입력 형식으로 변환된 원본을 그대로 출력한다. `--method subtract`는 비교용 직접 차감 방식이다.
-
-모델은 12초 단위, 2초 중첩으로 동작한다. `--chunk-seconds`, `--overlap-seconds`, `--threads`로 조정할 수 있다. CUDA/MPS 옵션은 노출하지만 이번 검증은 CPU만 수행했다.
-
-## 웹 데모
-
-```bash
+bash scripts/setup.sh        # 추출·제거·실시간: .venv, REAL-TSE 모델(약 1.05 GB), 웹 빌드
+bash scripts/setup_vc.sh     # 변환(선택): .venv-seedvc, Seed-VC (가중치 약 1.8 GB는 첫 변환 때 다운로드)
 .venv/bin/voice-killer-web   # http://127.0.0.1:8000
 ```
 
-프런트엔드는 `web/`의 React 앱이다. `scripts/setup.sh`가 Node.js가 있으면 빌드까지 하며, 수동으로는 `cd web && npm ci && npm run build` 후 서버를 다시 시작한다. 개발 중에는 서버를 띄운 채 `cd web && npm run dev`를 쓴다. 디자인 기준은 루트 `DESIGN.md`다.
+설치 스크립트는 고정된 revision의 연구 코드를 받고 모델 파일의 SHA-256을 검사한다.
 
-작업 공간에서 시작해 소스(처리할 오디오와 처리 구간)와 참조(대상이 혼자 말하는 5~10초)를 정한 뒤 추출·제거·변환·실시간 중 원하는 작업으로 이동한다. 메뉴의 상태 배지가 각 단계의 완료 여부를 보여 준다. 업로드는 ffmpeg로 16 kHz 모노로 변환하므로 mp3·mp4·webm도 받는다. 기본은 로컬(127.0.0.1)에서만 열리며 한 번에 한 요청만 처리한다.
+## 웹 데모 사용법
 
-다른 기기에서 접속하려면 `--host 0.0.0.0`을 쓴다. 브라우저는 HTTPS나 localhost에서만 마이크를 허용하므로 자체 서명 인증서와 함께 실행한다. 인증이 없으므로 같은 네트워크의 누구나 쓸 수 있다.
+화면은 **작업 공간**을 중심으로 6개 메뉴를 자유롭게 오간다. 메뉴의 배지가 각 단계가 `필요`인지, `진행 중`인지, `완료`인지 보여 준다.
+
+1. **소스**: 처리할 오디오를 올리거나 녹음하고, 파형에서 처리 구간(주황)을 고른다. 업로드는 ffmpeg로 변환하므로 wav, mp3, mp4, webm 모두 된다.
+2. **참조**: 대상 인물이 혼자 말하는 구간(초록)을 고른다. 같은 파일을 써도 되고 다른 파일을 올려도 된다.
+3. **작업**: 추출, 제거, 변환, 실시간 중 하나를 실행하고 원본과 결과를 번갈아 듣는다.
+   - **추출**: 결과 화면의 "이 결과를 참조로 쓰기" 버튼을 누르면 잡음 섞인 영상에서 뽑은 목소리를 변환의 참조로 바로 쓸 수 있다.
+   - **변환**: 원본은 최대 60초, 참조는 최대 30초까지 쓸 수 있다. 결과는 합성 음성임을 표시한다.
+   - **실시간**: 마이크 입력이나 파일 구간을 1초 또는 2초 블록으로 처리한다. 스피커 소리가 마이크로 되먹임되지 않도록 헤드폰을 쓴다.
+
+서버는 기본적으로 127.0.0.1에서만 열리며 한 번에 한 요청만 처리한다. 수 분이 넘는 고음질 원본은 브라우저의 파형 표시가 멈출 수 있으니 시연용으로 잘라 쓴다.
+
+### 다른 기기에서 접속
+
+브라우저는 HTTPS나 localhost에서만 마이크를 허용한다. 그래서 다른 기기에서 접속하려면 자체 서명 인증서와 함께 띄워야 하고, 접속하는 기기에서 인증서 경고를 한 번 수락해야 한다. 인증 기능이 없어서 같은 네트워크의 누구나 접속할 수 있다.
 
 ```bash
 mkdir -p .cache/tls && openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj /CN=voice-killer \
@@ -75,45 +46,110 @@ mkdir -p .cache/tls && openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj
 .venv/bin/voice-killer-web --host 0.0.0.0 --ssl-certfile .cache/tls/cert.pem --ssl-keyfile .cache/tls/key.pem
 ```
 
-접속하는 기기에서 인증서 경고를 한 번 수락해야 한다. '실시간 제거'는 마이크나 파일의 처리 구간을 1·2초 블록으로 서버에 보내 바로 재생한다. 이 PC에서 1초 블록의 추정 총지연은 약 1.6초다. 스피커 되먹임을 막으려면 헤드폰을 쓴다. 수 분 이상의 고음질 원본은 브라우저 파형 표시가 멈출 수 있으니 시연용으로 잘라 쓴다.
+방화벽이 켜져 있으면 8000번 포트를 연다. 시연이 끝나면 포트를 다시 닫는다.
 
-### 음성 변환
+### 프런트엔드 개발
 
 ```bash
-bash scripts/setup_vc.sh   # Seed-VC를 별도 .venv-seedvc에 설치 (GPL-3.0, 가중치 약 1.8 GB는 첫 변환 때 다운로드)
+cd web && npm run dev        # 서버(voice-killer-web)를 띄운 채로 실행
+cd web && npm run build      # 빌드 후 서버를 다시 시작해야 반영된다
 ```
 
-웹에서 '변환'을 고르면 처리 구간(바꿀 목소리)을 참조 구간(닮을 목소리)의 목소리로 바꾼다. 원본은 최대 60초, 참조는 최대 30초다. 이 PC에서 12.5초 음원 기준 약 29초(10 step)가 걸린다. 결과는 합성 음성이며 실존 인물 목소리 결과는 공개하지 않는다.
+React 19, Vite, [Goodcase UI](web/src/ui/SOURCE.md) 컴포넌트를 쓴다. 디자인 토큰과 정보 구조는 [DESIGN.md](DESIGN.md)에 정리돼 있다.
 
-## 스트리밍 실험
+## 명령줄 도구
+
+웹 없이 파일을 처리할 때 쓴다. 출력은 16 kHz 모노 float WAV다.
 
 ```bash
-# 70초 음원을 실제 시간 속도로 stdin에 공급하는 검증 스크립트
-.venv/bin/python scripts/stream_demo.py
+.venv/bin/voice-killer input.wav --enroll target-speaker.wav --output outputs/filtered.wav
+```
 
-# 실시간 속도로 디코딩한 파일을 PCM 파이프로 처리하는 예시
-set -o pipefail
+다음 파일이 함께 만들어진다.
+
+- `filtered.wav`: 제거 결과
+- `filtered.original.wav`: 같은 구간을 16 kHz 모노로 바꾼 원본(비교용)
+- `filtered.target.wav`: 추출된 대상 목소리
+- `filtered.json`: 입력·모델·출력 해시, 옵션, 처리 시간
+
+이미 있는 결과는 `--force` 없이는 덮어쓰지 않는다.
+
+- **기본 옵션**: `--method mask --mask-power 4 --hard-threshold 0.65 --strength 1`.
+- **더 부드럽게**: `--hard-threshold 1 --mask-power 2`. 대신 말소리가 더 남는다.
+- **처리 단위**: 모델은 12초 단위로 2초씩 겹쳐 처리한다. `--chunk-seconds`, `--overlap-seconds`, `--threads`로 바꿀 수 있다.
+
+### 잡스 발표 데모 재현
+
+```bash
+.venv/bin/python scripts/prepare_demo.py
+.venv/bin/voice-killer data/source/iphone-2007.wav --enroll data/jobs-enroll.wav \
+  --start 132 --duration 70 --output outputs/reveal.wav
+```
+
+원본은 [아이폰 소개 발췌 영상](https://www.youtube.com/watch?v=MnrJzXM7a6o)이다. 등록 구간은 12.4~19.4초다.
+
+### 스트리밍 실험
+
+```bash
 ffmpeg -re -i input.wav -f f32le -ar 16000 -ac 1 pipe:1 | \
-  .venv/bin/voice-killer-stream --enroll target-speaker.wav \
-    --report outputs/stream-report.json | \
+  .venv/bin/voice-killer-stream --enroll target-speaker.wav --report outputs/stream-report.json | \
   ffmpeg -f f32le -ar 16000 -ac 1 -i pipe:0 outputs/stream-result.wav
 ```
 
-이것은 **2초 입력 버퍼 + 계산 지연**이 있는 연속 처리 실험이다. 저지연 이어폰 ANC가 아니며 실제 마이크·스피커 장치의 종단 지연은 검증하지 않았다. 파일을 실제 시간 속도로 공급하고 매 블록 결과를 즉시 출력하는 방식이다. 오프라인과 문맥 길이가 달라 억제 품질도 다를 수 있다.
+## 실측 결과
 
-## 결과와 한계
+모든 수치는 시연 PC(Ryzen 7 8745HS, CPU만 사용)에서 측정했다.
 
-동일 발표에서 분리한 발화·박수 구간을 같은 RMS로 합친 시험에서, 기본 마스킹은 대상 발화 성분을 약 25.1 dB 줄이면서 관중 성분은 약 0.9 dB 줄였다. 실제 자연 박수 구간은 약 0.05 dB 감소했다. 이는 특정 시험 결과이며 모든 소리에 대한 보장이 아니다. [최종 70초 원본](outputs/reveal-final.original.wav)과 [처리본](outputs/reveal-final.wav), [전체 처리본](outputs/iphone-2007-final.wav)을 같은 재생 음량으로 비교할 수 있다.
+### 제거
 
-일부 큰 환호는 대상 화자와 함께 감소한다. 잔류음·음질 왜곡이 있고 16 kHz 모노로 고역·공간 정보가 줄어든다. ASR이 말을 인식하지 못해도 사람이 못 알아듣는다는 증명은 아니다. 타인 대화·한국어·마이크 입력의 일반화는 아직 검증하지 않았다.
+같은 발표에서 분리한 발화와 박수를 같은 음량으로 섞어 시험했다.
 
-[실험 결과와 근거](wiki/references/jobs-experiment.md) · [알고리즘](wiki/concepts/implementation.md) · [위키](wiki/index.md)
+- 대상 발화: 약 25.1 dB 감소
+- 관중 소리: 약 0.9 dB 감소
+- 실제 자연 박수 구간: 약 0.05 dB 감소
 
-## 검증
+특정 시험의 결과이며 모든 소리에 통하는 보장은 아니다.
+
+### 실시간 제거
+
+| 블록 | 서버 왕복 평균 | 브라우저 추정 총지연 |
+| --- | --- | --- |
+| 1초 | 692 ms | 약 1.6초 |
+| 2초 | 920 ms | 약 2.9초 |
+
+### 변환
+
+- 처리 시간: 12.5초 음원을 바꾸는 데 약 29초 걸린다(10 step). 워커를 띄우는 첫 요청은 약 36초다.
+- 화자 유사도: 변환 결과와 참조 목소리의 ECAPA 유사도가 0.655다(1이면 같은 목소리).
+
+### 한계
+
+- **같이 줄어드는 소리**: 큰 환호 일부가 대상 목소리와 함께 줄어든다. 남는 소리와 음질 왜곡도 있다.
+- **음질 손실**: 16 kHz 모노로 처리해서 고음과 공간감이 줄어든다.
+- **실시간의 정체**: 저지연 이어폰 노이즈 캔슬링이 아니다. 1~3초 늦게 나온다.
+- **아직 검증하지 않은 것**:
+  - 한국어 음성
+  - 실제 마이크와 스피커를 거친 종단 지연
+  - 변환 결과의 주관적 품질
+
+## 윤리
+
+변환 결과는 합성 음성이다. 실존 인물의 목소리로 만든 결과는 공개하지 않는다. 음원, 모델 가중치, 생성 결과는 Git에 넣지 않는다.
+
+## 테스트
 
 ```bash
 .venv/bin/python -m pytest -q
-.venv/bin/python scripts/evaluate_overlap.py
+cd web && npm run typecheck
 ```
 
-음원, 모델 가중치, 실험 출력은 Git에 넣지 않는다. 모델 출처·revision·체크포인트 해시는 `model-provenance.json`에 기록한다.
+## 문서
+
+- [위키](wiki/index.md)
+  - [로드맵](wiki/concepts/roadmap.md): 작업 트랙 A~E와 진행 상태
+  - [알고리즘](wiki/concepts/implementation.md)
+  - [잡스 실험 결과](wiki/references/jobs-experiment.md)
+  - [결정 기록(ADR)](wiki/decisions/index.md)
+- [DESIGN.md](DESIGN.md): 웹 디자인 시스템
+- [model-provenance.json](model-provenance.json): 모델 출처, revision, 체크포인트 해시
+- 라이선스: Seed-VC는 GPL-3.0이다. GPL 코드, 약 3 GB 메모리, 모델 로드 시간을 웹 서버와 분리하려고 별도 환경(`.venv-seedvc`)의 별도 프로세스로 실행한다. 공개 배포 전에는 라이선스 검토가 필요하다.
