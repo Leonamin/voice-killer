@@ -48,6 +48,11 @@ a.gc-button { text-decoration: none; }
 .vk-result audio { width: 100%; }
 .vk-hidden-input { display: none; }
 .vk-wave .region, .vk-wave [part~="region"] { color: var(--vk-text); }
+/* handles sit inside the region edge, so a region at 0s / the end stays fully reachable */
+.vk-wave ::part(region-handle) { width: 12px !important; background: var(--vk-text) !important; opacity: .35; border: 0 !important; cursor: ew-resize; }
+.vk-wave ::part(region-handle):hover { opacity: .7; }
+.vk-wave ::part(region-handle-left) { border-radius: 4px 0 0 4px !important; }
+.vk-wave ::part(region-handle-right) { border-radius: 0 4px 4px 0 !important; }
 
 @media (min-width: 960px) {
   .vk-app { flex-direction: row; }
