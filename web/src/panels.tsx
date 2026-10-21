@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Badge, Button, Card, Progress, RadioGroup, Select } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
 import { refBlobOf, refRangeOf, statusOf, TASK_LABEL, useApp, type NodeId, type Range, type Result, type Task } from "./state";
-import { Waveform, type WaveHandle } from "./Waveform";
+import { Waveform } from "./Waveform";
 
 const fmt = (r: Range | null) => (r ? `${r.start.toFixed(2)}초 – ${r.end.toFixed(2)}초 (${(r.end - r.start).toFixed(2)}초)` : "-");
 
@@ -56,7 +56,7 @@ export function Hub() {
 
 export function SourcePanel() {
   const { s, dispatch } = useApp();
-  const src = s.source, wave = useRef<WaveHandle>(null);
+  const src = s.source;
   const [error, setError] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const rec = useRef<MediaRecorder | null>(null);
@@ -89,9 +89,8 @@ export function SourcePanel() {
       {error && <Alert tone="danger" title="오류">{error}</Alert>}
       {src ? (
         <>
-          <Waveform ref={wave} blob={src.blob} range={src.range} initial={(d) => ({ start: 0, end: d })} kind="process" label="처리 구간"
+          <Waveform blob={src.blob} range={src.range} initial={(d) => ({ start: 0, end: d })} kind="process" label="처리 구간" note={`처리 구간 ${fmt(src.range)}`}
             onReady={(duration) => dispatch({ type: "sourceReady", duration })} onRange={(range) => dispatch({ type: "sourceRange", range })} />
-          <div className="vk-row"><Button variant="secondary" onClick={() => wave.current?.playRegion()}>▶ 처리 구간</Button><span className="vk-muted">처리 구간 {fmt(src.range)}</span></div>
         </>
       ) : <p className="vk-muted">아직 불러온 오디오가 없습니다.</p>}
     </Panel>
@@ -100,7 +99,7 @@ export function SourcePanel() {
 
 export function ReferencePanel() {
   const { s, dispatch } = useApp();
-  const { mode, file } = s.reference, blob = refBlobOf(s), range = refRangeOf(s), wave = useRef<WaveHandle>(null);
+  const { mode, file } = s.reference, blob = refBlobOf(s), range = refRangeOf(s);
   const r = range && range.end - range.start;
   return (
     <Panel title="참조" purpose="대상 목소리가 혼자 말하는 5~10초 구간을 지정합니다."
@@ -113,9 +112,8 @@ export function ReferencePanel() {
       {mode === "same" && !s.source && <Missing items={["source"]} />}
       {blob && (
         <>
-          <Waveform ref={wave} key={mode} blob={blob} range={range} initial={(d) => ({ start: 0, end: Math.min(7, d) })} kind="reference" label="참조 구간"
+          <Waveform key={mode} blob={blob} range={range} initial={(d) => ({ start: 0, end: Math.min(7, d) })} kind="reference" label="참조 구간" note={`참조 구간 ${fmt(range)}`}
             onReady={(duration) => mode === "file" && dispatch({ type: "refFileReady", duration })} onRange={(rg) => dispatch({ type: "refRange", range: rg })} />
-          <div className="vk-row"><Button variant="secondary" onClick={() => wave.current?.playRegion()}>▶ 참조 구간</Button><span className="vk-muted">참조 구간 {fmt(range)}</span></div>
           {r !== null && r < 1 && <Alert tone="warning" title="참조 구간이 너무 짧습니다">최소 1초, 권장 5~10초입니다.</Alert>}
         </>
       )}
