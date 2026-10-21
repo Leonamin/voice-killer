@@ -48,6 +48,10 @@ mkdir -p .cache/tls && openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj
 
 방화벽이 켜져 있으면 8000번 포트를 연다. 시연이 끝나면 포트를 다시 닫는다.
 
+### 상시 배포
+
+`sudo ./scripts/deploy.sh`가 소스를 `/opt/voice-killer/releases/<UTC 시각>`에 복사하고 `current` 링크를 바꾼 뒤 `voice-killer-web` 서비스를 재시작한다. venv는 절대 경로에 묶여 있어 복사하지 않고, `.venv-seedvc`·`models`·`vendor`는 저장소를 링크한다. 배포 전에 `web`을 빌드해 둔다. 공개는 Cloudflare Tunnel이 `127.0.0.1:8000`으로 연결하며, 앱에 인증이 없으므로 주소를 아는 사람은 누구나 쓸 수 있다.
+
 ### 프런트엔드 개발
 
 ```bash
