@@ -14,3 +14,4 @@ scope: "decisions"
 - [ADR 003: 웹 데모 범위와 책임 분리](003-web-demo-scope.md)
 - [ADR 004: 음성 변환에 Seed-VC 사용](004-voice-conversion-model.md)
 - [ADR 005: 웹 프런트엔드 재구성](005-web-frontend-redesign.md)
+- [ADR 006: vk.leonamin.com 인증 없는 공개 배포](006-public-deployment.md)

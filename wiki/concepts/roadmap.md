@@ -106,6 +106,10 @@ WebSocket `/ws/stream`:
 - ③은 화자 유사도(ECAPA 임베딩 코사인, 참조 대비)를 보조 지표로 검토한다.
 - 발표 흐름: STFT와 마스크 원리 → ① → ② → ④ → ③.
 
+## 배포
+
+2026-10-21 `vk.leonamin.com`으로 공개했다. 구성과 위험은 [ADR 006](../decisions/006-public-deployment.md)을 따른다.
+
 ## 마일스톤
 
 | 마일스톤 | 포함 | 의존 |
