@@ -8,6 +8,7 @@ scope: "logs"
 
 # Wiki Logs
 
+- [2026-10-21: 기준 오디오 후보 자동 탐색 구상](2026-10-21-reference-candidate-discovery.md)
 - [2026-10-21: 오디오 플레이어 UI 개선](2026-10-21-player-ui.md)
 - [2026-10-21: 코어 수별 성능 실측](2026-10-21-core-scaling-benchmark.md)
 - [2026-10-21: 사용법 페이지와 ffmpeg PATH 수정](2026-10-21-help-page-and-ffmpeg-path.md)
