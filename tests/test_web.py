@@ -34,3 +34,12 @@ def test_candidates_range_is_400(tmp_path, monkeypatch):
     with p.open("rb") as f:
         r = TestClient(web.app).post("/api/candidates", files={"audio": ("a.wav", f)}, data={"start": 0, "end": 99})
     assert r.status_code == 400
+
+
+def test_candidates_bad_speaker_count_is_400(tmp_path, monkeypatch):
+    monkeypatch.setattr(web.candidates, "available", lambda: True)
+    p = tmp_path / "a.wav"
+    sf.write(p, np.zeros(16000, np.float32), 16000)
+    with p.open("rb") as f:
+        r = TestClient(web.app).post("/api/candidates", files={"audio": ("a.wav", f)}, data={"start": 0, "end": 1, "num_speakers": 99})
+    assert r.status_code == 400 and "화자 수" in r.json()["detail"]

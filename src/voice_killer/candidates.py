@@ -11,6 +11,8 @@ EMB = DIR / "emb.onnx"
 MARGIN = 0.3  # seconds dropped on both sides of an overlap
 MIN_LEN = 2.0  # engine needs >= 1 s of voice; shorter pieces are poor references
 MAX_LEN = 10.0
+MINOR_TOTAL = 5.0  # a voice with less solo speech than this is probably noise or an outlier; the UI folds it
+AUTO_THRESHOLD = 0.7  # 0.5 split one speaker in two on a user recording; 0.9 merged both jobs-2007 speakers. ponytail: untuned between
 PER_SPEAKER = 5
 SR = 16000
 
@@ -19,12 +21,12 @@ def available():
     return SEG.is_file() and EMB.is_file()
 
 
-def _diarizer():
+def _diarizer(num_speakers=0):
     import sherpa_onnx as so
     cfg = so.OfflineSpeakerDiarizationConfig(
         segmentation=so.OfflineSpeakerSegmentationModelConfig(pyannote=so.OfflineSpeakerSegmentationPyannoteModelConfig(model=str(SEG)), num_threads=4),
         embedding=so.SpeakerEmbeddingExtractorConfig(model=str(EMB), num_threads=4),
-        clustering=so.FastClusteringConfig(threshold=0.5),  # ponytail: fixed threshold; expose num_clusters if speaker count is known
+        clustering=so.FastClusteringConfig(num_clusters=num_speakers or -1, threshold=AUTO_THRESHOLD),
     )
     return so.OfflineSpeakerDiarization(cfg)
 
@@ -60,9 +62,9 @@ def solo_spans(segments, margin=MARGIN, min_len=MIN_LEN):
     return [j for j in joined if j[1] - j[0] >= min_len], [tuple(m) for m in merged]
 
 
-def find(x, offset=0.0):
-    """x: 16 kHz mono float32. Times in the result are shifted by offset (seconds)."""
-    res = _diarizer().process(x.astype(np.float32)).sort_by_start_time()
+def find(x, offset=0.0, num_speakers=0):
+    """x: 16 kHz mono float32. Times in the result are shifted by offset (seconds). num_speakers 0 = automatic."""
+    res = _diarizer(num_speakers).process(x.astype(np.float32)).sort_by_start_time()
     solo, over = solo_spans([(r.start, r.end, r.speaker) for r in res])
     by, total = {}, {}
     for s, e, k in solo:
@@ -73,7 +75,7 @@ def find(x, offset=0.0):
     speakers = []
     for k, spans in by.items():
         spans.sort(key=lambda p: p[0] - p[1])
-        speakers.append({"total": total[k], "candidates": [{"start": round(s + offset, 2), "end": round(e + offset, 2)} for s, e in spans[:PER_SPEAKER]]})
+        speakers.append({"total": total[k], "is_minor": total[k] < MINOR_TOTAL, "candidates": [{"start": round(s + offset, 2), "end": round(e + offset, 2)} for s, e in spans[:PER_SPEAKER]]})
     speakers.sort(key=lambda p: -p["total"])
     for i, sp in enumerate(speakers, 1):
         sp["id"] = i

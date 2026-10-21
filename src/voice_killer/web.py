@@ -103,12 +103,14 @@ def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float 
 
 
 @app.post("/api/candidates")
-def find_candidates(audio: UploadFile = File(...), start: float = Form(0.0), end: float = Form(...)):
+def find_candidates(audio: UploadFile = File(...), start: float = Form(0.0), end: float = Form(...), num_speakers: int = Form(0)):
+    if not 0 <= num_speakers <= 10:
+        raise HTTPException(400, "화자 수는 0(자동)~10이어야 합니다")
     if not candidates.available():
         raise HTTPException(503, "후보 탐색 모델이 없습니다. scripts/setup_diarize.sh 를 실행하세요")
     x = crop(decode(audio), start, end, "탐색", MAX_SECONDS)
     with lock:
-        return candidates.find(x, offset=start)
+        return candidates.find(x, offset=start, num_speakers=num_speakers)
 
 
 MAX_BLOCK = 4 * SR
