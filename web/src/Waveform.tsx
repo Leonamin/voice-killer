@@ -28,7 +28,7 @@ export function Waveform({ blob, range, initial, kind, label, note, onReady, onR
     setError("");
     const regions = RegionsPlugin.create(), url = URL.createObjectURL(blob);
     const ws = WaveSurfer.create({
-      container: box.current!, height: 80, url, plugins: [regions],
+      container: box.current!, height: 80, url, plugins: [regions], dragToSeek: true, // playhead follows the pointer while dragging
       waveColor: tok("--vk-text-muted"), progressColor: tok("--vk-text"), cursorColor: tok("--vk-live"),
     });
     const me = (inst.current = { ws, region: null as Region | null });
