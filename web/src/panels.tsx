@@ -4,6 +4,7 @@ import { go, labelOf, NODES, StatusBadge } from "./App";
 import { refBlobOf, refRangeOf, statusOf, TASK_LABEL, useApp, type NodeId, type Range, type Result, type Task } from "./state";
 import type WaveSurfer from "wavesurfer.js";
 import { Waveform } from "./Waveform";
+import { Candidates } from "./Candidates";
 
 const fmt = (r: Range | null) => (r ? `${r.start.toFixed(2)}초 – ${r.end.toFixed(2)}초 (${(r.end - r.start).toFixed(2)}초)` : "-");
 
@@ -105,6 +106,7 @@ export function ReferencePanel() {
   const { s, dispatch } = useApp();
   const { mode, file } = s.reference, blob = refBlobOf(s), range = refRangeOf(s);
   const r = range && range.end - range.start;
+  const [pick, setPick] = useState(0); // Waveform reads its region only at creation: a picked candidate remounts it
   return (
     <Panel title="기준 목소리" purpose="대상 목소리가 혼자 말하는 5~10초 구간을 지정합니다."
       cta={<Button onClick={() => go("hub")}>다음: 작업 선택</Button>}>
@@ -117,9 +119,12 @@ export function ReferencePanel() {
         </>
       )}
       {mode === "same" && !s.source && <Missing items={["source"]} />}
+      {mode === "same" && s.source?.range && (
+        <Candidates blob={s.source.blob} range={s.source.range} onPick={(rg) => { dispatch({ type: "refRange", range: rg }); setPick((n) => n + 1); }} />
+      )}
       {blob && (
         <>
-          <Waveform key={mode} blob={blob} range={range} initial={(d) => ({ start: 0, end: Math.min(7, d) })} kind="reference" label="기준 구간" note={`기준 구간 ${fmt(range)}`}
+          <Waveform key={`${mode}-${pick}`} blob={blob} range={range} initial={(d) => ({ start: 0, end: Math.min(7, d) })} kind="reference" label="기준 구간" note={`기준 구간 ${fmt(range)}`}
             onReady={(duration) => mode === "file" && dispatch({ type: "refFileReady", duration })} onRange={(rg) => dispatch({ type: "refRange", range: rg })} />
           {r !== null && r < 1 && <Alert tone="warning" title="기준 구간이 너무 짧습니다">최소 1초, 권장 5~10초입니다.</Alert>}
         </>

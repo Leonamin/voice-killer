@@ -12,7 +12,7 @@ import soundfile as sf
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
-from . import engine
+from . import candidates, engine
 
 SR = 16000
 MAX_BYTES = 200 * 1024 * 1024  # ponytail: the 10-min stereo 48 kHz demo wav is 119 MB; whole upload sits in RAM
@@ -100,6 +100,15 @@ def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float 
     buf = io.BytesIO()
     sf.write(buf, out.astype(np.float32), SR, format="WAV", subtype="FLOAT")
     return Response(buf.getvalue(), media_type="audio/wav")
+
+
+@app.post("/api/candidates")
+def find_candidates(audio: UploadFile = File(...), start: float = Form(0.0), end: float = Form(...)):
+    if not candidates.available():
+        raise HTTPException(503, "후보 탐색 모델이 없습니다. scripts/setup_diarize.sh 를 실행하세요")
+    x = crop(decode(audio), start, end, "탐색", MAX_SECONDS)
+    with lock:
+        return candidates.find(x, offset=start)
 
 
 MAX_BLOCK = 4 * SR
