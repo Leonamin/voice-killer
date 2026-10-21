@@ -45,7 +45,7 @@ a.gc-button { text-decoration: none; }
 .vk-hub a.vk-stretch { color: var(--vk-text); text-decoration: none; }
 .vk-hub a.vk-stretch::after { content: ""; position: absolute; inset: 0; }
 .vk-result { background: var(--vk-surface-subtle); border-radius: var(--vk-rounded-md); padding: var(--vk-space-lg); display: flex; flex-direction: column; gap: var(--vk-space-md); }
-.vk-result audio { width: 100%; }
+
 .vk-hidden-input { display: none; }
 .vk-wave .region, .vk-wave [part~="region"] { color: var(--vk-text); }
 /* handles sit inside the region edge, so a region at 0s / the end stays fully reachable */
@@ -82,3 +82,6 @@ a.gc-button { text-decoration: none; }
 .vk-faq { margin: 0; display: flex; flex-direction: column; gap: var(--vk-space-sm); }
 .vk-faq dt { font-weight: 600; margin-top: var(--vk-space-sm); }
 .vk-faq dd { margin: 0; color: var(--vk-text-muted); }
+.vk-play { min-width: 8.5em; }
+.vk-clock { font-variant-numeric: tabular-nums; font-family: var(--vk-font-mono, ui-monospace, monospace); min-width: 15ch; }
+.vk-volume input[type=range] { width: 100%; max-width: 320px; accent-color: var(--vk-primary); }

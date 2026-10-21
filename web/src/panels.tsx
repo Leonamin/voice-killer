@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Badge, Button, Card, Progress, RadioGroup, Select } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
 import { refBlobOf, refRangeOf, statusOf, TASK_LABEL, useApp, type NodeId, type Range, type Result, type Task } from "./state";
+import type WaveSurfer from "wavesurfer.js";
 import { Waveform } from "./Waveform";
 
 const fmt = (r: Range | null) => (r ? `${r.start.toFixed(2)}초 – ${r.end.toFixed(2)}초 (${(r.end - r.start).toFixed(2)}초)` : "-");
@@ -129,22 +130,22 @@ export function ReferencePanel() {
 
 function ResultBlock({ task, res }: { task: Task; res: Result }) {
   const { dispatch } = useApp();
-  const out = useRef<HTMLAudioElement>(null), orig = useRef<HTMLAudioElement>(null);
+  const out = useRef<WaveSurfer | null>(null), orig = useRef<HTMLAudioElement>(null);
   const [side, setSide] = useState<"A" | "B">("A");
   // A/B: original 처리 구간 (A) vs result (B); both play from the same offset within the 처리 구간
   function toggle() {
-    const a = side === "A", from = (a ? orig : out).current!, to = (a ? out : orig).current!;
-    const off = Math.max(0, a ? from.currentTime - res.procStart : from.currentTime);
-    from.pause(); setSide(a ? "B" : "A");
-    to.currentTime = a ? off : res.procStart + off;
-    void to.play(); // ponytail: original is not stopped at 처리 구간 end; webm may seek imprecisely
+    const ws = out.current, o = orig.current;
+    if (!ws || !o) return;
+    const a = side === "A", off = Math.max(0, a ? o.currentTime - res.procStart : ws.getCurrentTime());
+    setSide(a ? "B" : "A");
+    if (a) { o.pause(); ws.setTime(off); void ws.play(); } else { ws.pause(); o.currentTime = res.procStart + off; void o.play(); } // ponytail: original is not stopped at 처리 구간 end; webm may seek imprecisely
   }
   return (
     <div className="vk-result" aria-label="결과">
       <div className="vk-row"><h2 className="vk-title">결과</h2>{task === "convert" && <Badge tone="warning">합성 음성</Badge>}
         <span className="vk-muted">{new Date(res.createdAt).toLocaleTimeString("ko-KR")}</span></div>
       {task === "convert" && <p className="vk-muted" style={{ margin: 0 }}>AI로 변환된 목소리입니다.</p>}
-      <audio ref={out} src={res.url} controls />
+      <Waveform blob={res.blob} kind="result" label="결과" wsRef={out} />
       <audio ref={orig} src={res.origUrl} hidden />
       <div className="vk-row">
         <Button variant="secondary" aria-pressed={side === "B"} onClick={toggle}>
