@@ -82,13 +82,13 @@ def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float 
     mix = crop(x, start, end, "처리", MAX_SECONDS)
     if mode == "convert" and len(mix) > engine.MAX_VC_SOURCE * SR:
         raise HTTPException(400, f"변환할 구간은 최대 {engine.MAX_VC_SOURCE}초입니다")
-    enroll = crop(decode(ref) if ref and ref.filename else x, ref_start, ref_end, "참조")
+    enroll = crop(decode(ref) if ref and ref.filename else x, ref_start, ref_end, "기준 목소리")
     try:
         engine.check_enrollment(enroll)
     except ValueError as e:
-        raise HTTPException(400, f"참조 구간: {e}")
+        raise HTTPException(400, f"기준 목소리 구간: {e}")
     if mode == "convert" and len(enroll) > engine.MAX_VC_REFERENCE * SR:
-        raise HTTPException(400, f"참조 구간은 최대 {engine.MAX_VC_REFERENCE}초입니다")
+        raise HTTPException(400, f"기준 목소리 구간은 최대 {engine.MAX_VC_REFERENCE}초입니다")
     with lock:
         if mode == "convert":
             try:

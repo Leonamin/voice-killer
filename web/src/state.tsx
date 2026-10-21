@@ -31,7 +31,7 @@ type Action =
   | { type: "done"; task: Task; result: Result }
   | { type: "fail"; task: Task; message: string };
 
-export const TASK_LABEL: Record<Task, string> = { extract: "추출", remove: "제거", convert: "변환" };
+export const TASK_LABEL: Record<Task, string> = { extract: "목소리 추출", remove: "목소리 제거", convert: "목소리 변환" };
 const initial: State = { source: null, reference: { mode: "same", sameRange: null, file: null }, results: {}, running: {}, errors: {}, live: { isRunning: false, hasDone: false } };
 const REF_DEFAULT = 7; // seconds
 const revoke = (r?: Result) => r && (URL.revokeObjectURL(r.url), URL.revokeObjectURL(r.origUrl));
@@ -96,7 +96,7 @@ export const useApp = () => useContext(C)!;
 
 async function request(s: State, task: Task, p: Params): Promise<Result> {
   const src = s.source, rr = refRangeOf(s), rb = refBlobOf(s);
-  if (!src?.range || !rr || !rb) throw new Error("소스와 참조가 필요합니다");
+  if (!src?.range || !rr || !rb) throw new Error("원본 오디오와 기준 목소리가 필요합니다");
   const fd = new FormData();
   fd.append("audio", src.blob, "input");
   fd.append("start", String(src.range.start)); fd.append("end", String(src.range.end));
@@ -125,7 +125,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const src = ref.current.source?.blob;
     try {
       const result = await request(ref.current, task, p);
-      if (ref.current.source?.blob !== src) { URL.revokeObjectURL(result.url); URL.revokeObjectURL(result.origUrl); dispatch({ type: "fail", task, message: "소스가 바뀌어 결과를 버렸습니다" }); }
+      if (ref.current.source?.blob !== src) { URL.revokeObjectURL(result.url); URL.revokeObjectURL(result.origUrl); dispatch({ type: "fail", task, message: "원본 오디오가 바뀌어 결과를 버렸습니다" }); }
       else { dispatch({ type: "done", task, result }); notify({ title: `${TASK_LABEL[task]} 완료`, tone: "success", timer: "circle" }); }
     }
     catch (e) { dispatch({ type: "fail", task, message: (e as Error).message }); notify({ title: `${TASK_LABEL[task]} 실패`, tone: "error" }); }

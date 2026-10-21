@@ -7,12 +7,12 @@ import { Hub, ReferencePanel, SourcePanel, TaskPanel } from "./panels";
 import { Help } from "./Help";
 
 export const NODES: { id: NodeId; label: string; desc: string; group: string }[] = [
-  { id: "source", label: "소스", desc: "처리할 오디오와 처리 구간", group: "공통 자원" },
-  { id: "reference", label: "참조", desc: "대상 목소리 구간 (같은 파일 또는 다른 파일)", group: "공통 자원" },
-  { id: "extract", label: "추출", desc: "대상 화자의 목소리만 남깁니다", group: "작업" },
-  { id: "remove", label: "제거", desc: "대상 화자의 목소리를 지웁니다", group: "작업" },
-  { id: "convert", label: "변환", desc: "소스 목소리를 참조 목소리로 바꿉니다", group: "작업" },
-  { id: "live", label: "실시간", desc: "마이크나 파일에서 실시간으로 제거합니다", group: "작업" },
+  { id: "source", label: "원본 오디오", desc: "처리할 오디오와 처리 구간", group: "준비" },
+  { id: "reference", label: "기준 목소리", desc: "대상 목소리가 혼자 말하는 구간 (같은 파일 또는 다른 파일)", group: "준비" },
+  { id: "extract", label: "목소리 추출", desc: "기준 목소리와 같은 사람의 목소리만 남깁니다", group: "기능" },
+  { id: "remove", label: "목소리 제거", desc: "기준 목소리와 같은 사람의 목소리를 지웁니다", group: "기능" },
+  { id: "convert", label: "목소리 변환", desc: "원본 오디오의 목소리를 기준 목소리로 바꿉니다", group: "기능" },
+  { id: "live", label: "실시간 목소리 제거", desc: "마이크나 파일에서 실시간으로 지웁니다", group: "기능" },
 ];
 export const labelOf = (id: NodeId) => NODES.find((n) => n.id === id)!.label;
 
@@ -41,9 +41,9 @@ function NavList({ route, onNavigate }: { route: string; onNavigate?: () => void
     <nav className="vk-nav" aria-label="주 메뉴">
       {item("hub", "작업 공간")}
       {item("help", "사용법")}
-      {["공통 자원", "작업"].map((g) => (
-        <div key={g} role="group" aria-labelledby={`g-${g === "작업" ? "task" : "res"}`} className="vk-nav">
-          <h2 id={`g-${g === "작업" ? "task" : "res"}`}>{g}</h2>
+      {["준비", "기능"].map((g) => (
+        <div key={g} role="group" aria-labelledby={`g-${g === "기능" ? "task" : "res"}`} className="vk-nav">
+          <h2 id={`g-${g === "기능" ? "task" : "res"}`}>{g}</h2>
           {NODES.filter((n) => n.group === g).map((n) => item(n.id, n.label, statusOf(s, n.id)))}
         </div>
       ))}

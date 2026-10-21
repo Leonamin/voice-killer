@@ -130,15 +130,15 @@ export function Live() {
   return (
     <section className="vk-panel" aria-labelledby="panel-title">
       <header>
-        <h1 id="panel-title" className="vk-display">실시간 {isRunning && <span className="vk-live-dot" role="img" aria-label="실행 중" />}</h1>
+        <h1 id="panel-title" className="vk-display">실시간 목소리 제거 {isRunning && <span className="vk-live-dot" role="img" aria-label="실행 중" />}</h1>
         <p>마이크나 파일에서 대상 목소리를 실시간으로 제거합니다.</p>
       </header>
       <Alert tone="warning" title="헤드폰을 쓰세요">스피커 되먹임을 막기 위해서입니다. 마이크는 에코 제거, 잡음 억제, 자동 게인을 끄고 받습니다.</Alert>
       <RadioGroup label="등록 음성" value={enrollSrc} onValueChange={setEnrollSrc} isDisabled={isRunning}
-        options={[{ value: "ref", label: "참조 구간" }, { value: "mic", label: "마이크로 녹음" }]} />
+        options={[{ value: "ref", label: "기준 목소리 구간" }, { value: "mic", label: "마이크로 녹음" }]} />
       {enrollSrc === "mic" && <TextField label="녹음 시간 (초, 1~30)" type="number" min={1} max={30} value={secs} disabled={isRunning} onChange={(e) => setSecs(e.target.value)} />}
       <RadioGroup label="입력" value={inSrc} onValueChange={setInSrc} isDisabled={isRunning}
-        options={[{ value: "mic", label: "마이크" }, { value: "file", label: "소스의 처리 구간 (실시간 재생)" }]} />
+        options={[{ value: "mic", label: "마이크" }, { value: "file", label: "원본 오디오의 처리 구간 (실시간 재생)" }]} />
       <div className="vk-row">
         <Switch label="원본 듣기" isChecked={isOrig} isDisabled={isRunning || inSrc !== "file"} onCheckedChange={setIsOrig} />
         <Select label="블록" value={block} onValueChange={setBlock} isDisabled={isRunning} options={[{ value: "1", label: "1초" }, { value: "2", label: "2초" }]} />

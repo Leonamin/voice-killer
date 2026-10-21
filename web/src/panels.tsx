@@ -38,10 +38,10 @@ function FilePick({ label, onFile }: { label: string; onFile: (f: File) => void 
 
 export function Hub() {
   const { s } = useApp();
-  const next: [string, NodeId] = statusOf(s, "source") !== "완료" ? ["다음: 소스 불러오기", "source"]
-    : statusOf(s, "reference") !== "완료" ? ["다음: 참조 지정", "reference"] : ["추천: 제거 해 보기", "remove"];
+  const next: [string, NodeId] = statusOf(s, "source") !== "완료" ? ["다음: 원본 오디오 불러오기", "source"]
+    : statusOf(s, "reference") !== "완료" ? ["다음: 기준 목소리 지정", "reference"] : ["추천: 목소리 제거 해 보기", "remove"];
   return (
-    <Panel title="작업 공간" purpose="소스와 참조를 정한 뒤 작업을 고르세요."
+    <Panel title="작업 공간" purpose="원본 오디오와 기준 목소리를 정한 뒤 기능을 고르세요."
       cta={<Button onClick={() => go(next[1])}>{next[0]}</Button>}>
       <div className="vk-hub">
         {NODES.map((n) => (
@@ -79,8 +79,8 @@ export function SourcePanel() {
   }
 
   return (
-    <Panel title="소스" purpose="처리할 오디오를 올리거나 녹음하고, 결과를 만들 구간을 정합니다."
-      cta={<Button onClick={() => go("reference")}>다음: 참조 지정</Button>}>
+    <Panel title="원본 오디오" purpose="처리할 오디오를 올리거나 녹음하고, 결과를 만들 구간을 정합니다."
+      cta={<Button onClick={() => go("reference")}>다음: 기준 목소리 지정</Button>}>
       <div className="vk-row">
         <FilePick label="파일 올리기" onFile={(f) => { setError(""); dispatch({ type: "source", blob: f, name: f.name }); }} />
         <Button variant="secondary" onClick={toggleRec}>{isRecording ? "녹음 중지" : "녹음 시작"}</Button>
@@ -102,19 +102,19 @@ export function ReferencePanel() {
   const { mode, file } = s.reference, blob = refBlobOf(s), range = refRangeOf(s);
   const r = range && range.end - range.start;
   return (
-    <Panel title="참조" purpose="대상 목소리가 혼자 말하는 5~10초 구간을 지정합니다."
+    <Panel title="기준 목소리" purpose="대상 목소리가 혼자 말하는 5~10초 구간을 지정합니다."
       cta={<Button onClick={() => go("hub")}>다음: 작업 선택</Button>}>
-      <RadioGroup label="참조 위치" value={mode} onValueChange={(v) => dispatch({ type: "refMode", mode: v as "same" | "file" })}
-        options={[{ value: "same", label: "소스와 같은 파일" }, { value: "file", label: "다른 파일" }]} />
+      <RadioGroup label="기준 목소리 위치" value={mode} onValueChange={(v) => dispatch({ type: "refMode", mode: v as "same" | "file" })}
+        options={[{ value: "same", label: "원본 오디오와 같은 파일" }, { value: "file", label: "다른 파일" }]} />
       {mode === "file" && (
-        <div className="vk-row"><FilePick label="참조 파일 올리기" onFile={(f) => dispatch({ type: "refFile", blob: f, name: f.name })} />{file && <span className="vk-muted">{file.name}</span>}</div>
+        <div className="vk-row"><FilePick label="기준 목소리 파일 올리기" onFile={(f) => dispatch({ type: "refFile", blob: f, name: f.name })} />{file && <span className="vk-muted">{file.name}</span>}</div>
       )}
       {mode === "same" && !s.source && <Missing items={["source"]} />}
       {blob && (
         <>
-          <Waveform key={mode} blob={blob} range={range} initial={(d) => ({ start: 0, end: Math.min(7, d) })} kind="reference" label="참조 구간" note={`참조 구간 ${fmt(range)}`}
+          <Waveform key={mode} blob={blob} range={range} initial={(d) => ({ start: 0, end: Math.min(7, d) })} kind="reference" label="기준 구간" note={`기준 구간 ${fmt(range)}`}
             onReady={(duration) => mode === "file" && dispatch({ type: "refFileReady", duration })} onRange={(rg) => dispatch({ type: "refRange", range: rg })} />
-          {r !== null && r < 1 && <Alert tone="warning" title="참조 구간이 너무 짧습니다">최소 1초, 권장 5~10초입니다.</Alert>}
+          {r !== null && r < 1 && <Alert tone="warning" title="기준 구간이 너무 짧습니다">최소 1초, 권장 5~10초입니다.</Alert>}
         </>
       )}
     </Panel>
@@ -146,7 +146,7 @@ function ResultBlock({ task, res }: { task: Task; res: Result }) {
         </Button>
         <a className="gc-button gc-button-secondary" href={res.url} download="result.wav">다운로드</a>
         {task === "extract" && (
-          <Button variant="secondary" onClick={() => { dispatch({ type: "refFile", blob: res.blob, name: "추출 결과" }); go("reference"); }}>이 결과를 참조로 쓰기</Button>
+          <Button variant="secondary" onClick={() => { dispatch({ type: "refFile", blob: res.blob, name: "추출 결과" }); go("reference"); }}>이 결과를 기준 목소리로 쓰기</Button>
         )}
       </div>
     </div>
@@ -154,9 +154,9 @@ function ResultBlock({ task, res }: { task: Task; res: Result }) {
 }
 
 const PURPOSE: Record<Task, string> = {
-  extract: "참조 목소리와 같은 화자의 목소리만 남깁니다.",
-  remove: "참조 목소리와 같은 화자의 목소리를 지웁니다.",
-  convert: "소스 목소리를 참조 목소리로 바꿉니다.",
+  extract: "기준 목소리와 같은 화자의 목소리만 남깁니다.",
+  remove: "기준 목소리와 같은 화자의 목소리를 지웁니다.",
+  convert: "원본 오디오의 목소리를 기준 목소리로 바꿉니다.",
 };
 
 export function TaskPanel({ task }: { task: Task }) {
@@ -180,7 +180,7 @@ export function TaskPanel({ task }: { task: Task }) {
       {task === "convert" && (
         <>
           <Select label="품질" value={steps} onValueChange={setSteps} options={[{ value: "10", label: "품질 (10)" }, { value: "4", label: "빠름 (4)" }]} />
-          <p className="vk-muted" style={{ margin: 0 }}>처리 구간 = 바꿀 목소리, 참조 = 닮을 목소리. 합성 음성이 만들어지며 음원 길이의 약 2~3배가 걸릴 수 있습니다.</p>
+          <p className="vk-muted" style={{ margin: 0 }}>원본 오디오의 처리 구간 = 바꿀 목소리, 기준 목소리 = 닮을 목소리. 합성 음성이 만들어지며 음원 길이의 약 2~3배가 걸릴 수 있습니다.</p>
         </>
       )}
       {otherRunning && <p className="vk-muted" style={{ margin: 0 }}>다른 작업이 실행 중입니다. 끝나면 실행할 수 있습니다.</p>}
