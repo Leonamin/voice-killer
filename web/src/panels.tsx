@@ -25,6 +25,8 @@ function Missing({ items }: { items: NodeId[] }) {
   );
 }
 
+const FORMATS = "wav, mp3, mp4, webm 등 오디오·영상 파일을 올릴 수 있습니다.";
+
 function FilePick({ label, onFile }: { label: string; onFile: (f: File) => void }) {
   const input = useRef<HTMLInputElement>(null);
   return (
@@ -86,6 +88,7 @@ export function SourcePanel() {
         <Button variant="secondary" onClick={toggleRec}>{isRecording ? "녹음 중지" : "녹음 시작"}</Button>
         {src && <span className="vk-muted">{src.name}</span>}
       </div>
+      <p className="vk-muted" style={{ margin: 0 }}>{FORMATS}</p>
       {error && <Alert tone="danger" title="오류">{error}</Alert>}
       {src ? (
         <>
@@ -107,7 +110,10 @@ export function ReferencePanel() {
       <RadioGroup label="기준 목소리 위치" value={mode} onValueChange={(v) => dispatch({ type: "refMode", mode: v as "same" | "file" })}
         options={[{ value: "same", label: "원본 오디오와 같은 파일" }, { value: "file", label: "다른 파일" }]} />
       {mode === "file" && (
-        <div className="vk-row"><FilePick label="기준 목소리 파일 올리기" onFile={(f) => dispatch({ type: "refFile", blob: f, name: f.name })} />{file && <span className="vk-muted">{file.name}</span>}</div>
+        <>
+          <div className="vk-row"><FilePick label="기준 목소리 파일 올리기" onFile={(f) => dispatch({ type: "refFile", blob: f, name: f.name })} />{file && <span className="vk-muted">{file.name}</span>}</div>
+          <p className="vk-muted" style={{ margin: 0 }}>{FORMATS}</p>
+        </>
       )}
       {mode === "same" && !s.source && <Missing items={["source"]} />}
       {blob && (
