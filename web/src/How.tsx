@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Slider } from "./ui/components";
+import { Slider, Tabs } from "./ui/components";
 import { Arch } from "./Arch";
 import { describe, strengthOf } from "./strength";
 
@@ -49,17 +49,9 @@ function Step({ n, title, children, more }: { n: number; title: string; children
   );
 }
 
-export function How() {
+function Principle() {
   return (
-    <section className="vk-panel" aria-labelledby="panel-title">
-      <header>
-        <h1 id="panel-title" className="vk-display">원리와 구조</h1>
-      </header>
-
-      <h2 className="vk-title">1. 구조</h2>
-      <Arch />
-
-      <h2 className="vk-title">2. 원리 다섯 단계</h2>
+    <div className="vk-how-tab">
       <ol className="vk-steps">
         <Step n={1} title="소리를 시간 × 주파수 칸으로 나눈다"
           more={<p>이 변환 이름은 STFT입니다. 0.03초쯤 되는 짧은 조각마다 낮은 소리부터 높은 소리까지 에너지를 잽니다. 이 서버는 512 샘플(16 kHz에서 약 0.03초) 조각을 128 샘플씩 밀면서 잽니다.</p>}>
@@ -83,11 +75,11 @@ export function How() {
         </Step>
       </ol>
 
-      <h2 className="vk-title">3. 직접 해 보기</h2>
+      <h2 className="vk-title">직접 해 보기</h2>
       <p className="vk-muted" style={{ margin: 0 }}>실제 소리가 아니라 칸으로 그린 모형입니다.</p>
       <GridDemo />
 
-      <h2 className="vk-title">4. 우리가 잰 것</h2>
+      <h2 className="vk-title">우리가 잰 것</h2>
       <p className="vk-muted" style={{ margin: 0 }}>발표 영상의 발화와 환호를 같은 크기로 섞은 시험 한 건입니다. 한국어와 실제 마이크는 확인하지 않았습니다.</p>
       <div className="vk-table-wrap">
         <table className="vk-table">
@@ -105,6 +97,20 @@ export function How() {
         <li>키우면 대상 목소리와 함께 주변 소리도 조금 커집니다. 대상과 주변 소리를 완전히 가르지 못하기 때문으로 보이며 원인은 확인하지 않았습니다.</li>
         <li>소리 크기 변화만 잰 값이고, 사람이 알아듣는 정도는 아닙니다.</li>
       </ul>
+    </div>
+  );
+}
+
+export function How() {
+  return (
+    <section className="vk-panel" aria-labelledby="panel-title">
+      <header>
+        <h1 id="panel-title" className="vk-display">원리와 구조</h1>
+      </header>
+      <Tabs label="원리와 구조" items={[
+        { value: "structure", label: "구조", content: <div className="vk-how-tab"><Arch /></div> },
+        { value: "principle", label: "원리", content: <Principle /> },
+      ]} />
     </section>
   );
 }
