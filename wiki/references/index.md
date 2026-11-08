@@ -14,3 +14,4 @@ scope: "references"
 - [스티브 잡스 발표 억제 실험](jobs-experiment.md)
 - [음성 변환 모델 스파이크](vc-spike.md)
 - [코어 수별 실시간 제거·음성 변환 실측](core-scaling-benchmark.md)
+- [조절 강도별 실측](gain-sweep.md)

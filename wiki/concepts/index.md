@@ -15,3 +15,4 @@ scope: "concepts"
 - [파일 변환 및 스트리밍 구현](implementation.md)
 - [웹 데모 로드맵](roadmap.md)
 - [기준 오디오 후보 자동 탐색](reference-candidate-discovery.md)
+- [2조 주제발표·미니워크숍 요구](team2-topic-presentation.md)

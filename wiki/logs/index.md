@@ -8,6 +8,7 @@ scope: "logs"
 
 # Wiki Logs
 
+- [2026-11-08: 2조 주제발표 요구 기록](2026-11-08-team2-topic-presentation.md)
 - [2026-10-21: 기준 오디오 후보 자동 탐색 구상](2026-10-21-reference-candidate-discovery.md)
 - [2026-10-21: 오디오 플레이어 UI 개선](2026-10-21-player-ui.md)
 - [2026-10-21: 코어 수별 성능 실측](2026-10-21-core-scaling-benchmark.md)
