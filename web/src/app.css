@@ -148,3 +148,4 @@ a.gc-button { text-decoration: none; }
 .vk-curve-ref { fill: none; stroke: var(--vk-text-muted); stroke-width: 1; stroke-dasharray: 4 4; }
 .vk-curve-cut { stroke: var(--vk-text-muted); stroke-width: 1; stroke-dasharray: 2 3; }
 .vk-curve-axis { stroke: var(--vk-control-border); stroke-width: 1; }
+.vk-spectro { width: 100%; height: auto; aspect-ratio: 5 / 2; image-rendering: pixelated; background: var(--vk-bg); border: 1px solid var(--vk-border); border-radius: var(--vk-rounded-md); display: block; }
