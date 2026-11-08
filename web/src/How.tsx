@@ -17,8 +17,9 @@ const HARD = 0.65; // dsp.suppress hard_threshold: cells with ratio >= HARD are 
 /** Same steps as dsp.suppress: ratio q = S / (S + R), sharpen with power p, hard cut at HARD. */
 const maskOf = (q: number, p: number) => (q >= HARD ? 1 : q ** p / (q ** p + (1 - q) ** p));
 const RATIO = Float32Array.from(S, (s, i) => s / (s + R[i]));
-const SHOWN_DB = 60; // brightness range: 0 dB (loudest) .. -60 dB
+const SHOWN_DB = 35; // brightness range: 0 dB (loudest) .. -35 dB
 const bright = (mag: number) => Math.min(1, Math.max(0, 1 + 20 * Math.log10(Math.max(mag, 1e-9)) / SHOWN_DB));
+const CUT_GRAY = 0.12; // cells cut to 0 stay dark gray, not pure black
 
 type Tone = "mix" | "voice" | "other" | "heat";
 const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -115,7 +116,7 @@ function Principle() {
         </Step>
         <Step n={5} title="마스크만큼 곱해서 줄이거나 키운다"
           visual={<div className="vk-how-demo">
-            <figure><Spectro tone="mix" at={(i) => bright(X[i] * Math.max(0, 1 - k * maskOf(RATIO[i], p)))} label="크기를 바꾼 결과" /><Cap>섞인 소리의 칸에 (1 − 강도 × 마스크)를 곱한 결과</Cap></figure>
+            <figure><Spectro tone="mix" at={(i) => Math.max(CUT_GRAY, bright(X[i] * Math.max(0, 1 - k * maskOf(RATIO[i], p))))} label="크기를 바꾼 결과" /><Cap>섞인 소리의 칸에 (1 − 강도 × 마스크)를 곱한 결과</Cap></figure>
             <Slider label="강도" min={-1} max={1} step={0.05} value={u} onValueChange={setU} valueText={describe(u)}
               description="왼쪽은 줄이기, 가운데는 그대로, 오른쪽은 키우기입니다." />
           </div>}
