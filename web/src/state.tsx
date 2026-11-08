@@ -2,10 +2,11 @@ import { useToast } from "./ui/components";
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef, type ReactNode } from "react";
 
 export type Range = { start: number; end: number };
-export type Task = "extract" | "remove" | "convert";
-export type NodeId = "source" | "reference" | Task | "live";
+export type Task = "remove";
+export type NodeId = "source" | "reference" | Task;
 export type Status = "필요" | "진행 중" | "완료";
-export type Params = { strength: number; steps: number };
+// strength: 1 = reduce fully, 0 = unchanged, negative = boost (server accepts [-4, 1])
+export type Params = { strength: number };
 export type Result = { blob: Blob; url: string; origUrl: string; procStart: number; params: Params; createdAt: number };
 export type Clip = { blob: Blob; name: string; duration: number; range: Range | null };
 
@@ -15,7 +16,6 @@ type State = {
   results: Partial<Record<Task, Result>>;
   running: Partial<Record<Task, boolean>>;
   errors: Partial<Record<Task, string>>;
-  live: { isRunning: boolean; hasDone: boolean };
 };
 type Action =
   | { type: "source"; blob: Blob; name: string }
@@ -25,14 +25,12 @@ type Action =
   | { type: "refFile"; blob: Blob; name: string }
   | { type: "refFileReady"; duration: number }
   | { type: "refRange"; range: Range }
-  | { type: "liveRunning"; isRunning: boolean }
-  | { type: "liveBlock" }
   | { type: "start"; task: Task }
   | { type: "done"; task: Task; result: Result }
   | { type: "fail"; task: Task; message: string };
 
-export const TASK_LABEL: Record<Task, string> = { extract: "목소리 추출", remove: "목소리 제거", convert: "목소리 변환" };
-const initial: State = { source: null, reference: { mode: "same", sameRange: null, file: null }, results: {}, running: {}, errors: {}, live: { isRunning: false, hasDone: false } };
+export const TASK_LABEL: Record<Task, string> = { remove: "목소리 크기 조절" };
+const initial: State = { source: null, reference: { mode: "same", sameRange: null, file: null }, results: {}, running: {}, errors: {} };
 const REF_DEFAULT = 7; // seconds
 const revoke = (r?: Result) => r && (URL.revokeObjectURL(r.url), URL.revokeObjectURL(r.origUrl));
 
@@ -61,8 +59,6 @@ function reducer(s: State, a: Action): State {
       const r = s.reference;
       return r.mode === "same" ? { ...s, reference: { ...r, sameRange: a.range } } : r.file ? { ...s, reference: { ...r, file: { ...r.file, range: a.range } } } : s;
     }
-    case "liveRunning": return { ...s, live: { ...s.live, isRunning: a.isRunning } };
-    case "liveBlock": return s.live.hasDone ? s : { ...s, live: { ...s.live, hasDone: true } };
     case "start":
       return { ...s, running: { ...s.running, [a.task]: true }, errors: { ...s.errors, [a.task]: undefined } };
     case "done":
@@ -85,7 +81,6 @@ export function statusOf(s: State, id: NodeId): Status {
       if (r && r.end - r.start >= 1) return "완료";
       return s.reference.mode === "file" && s.reference.file ? "진행 중" : "필요";
     }
-    case "live": return s.live.isRunning ? "진행 중" : s.live.hasDone ? "완료" : "필요"; // hasDone: >= 1 block this page lifetime
     default: return s.running[id] ? "진행 중" : s.results[id] ? "완료" : "필요";
   }
 }
@@ -102,7 +97,7 @@ async function request(s: State, task: Task, p: Params): Promise<Result> {
   fd.append("start", String(src.range.start)); fd.append("end", String(src.range.end));
   if (s.reference.mode === "file") fd.append("ref", rb, "ref");
   fd.append("ref_start", String(rr.start)); fd.append("ref_end", String(rr.end));
-  fd.append("mode", task); fd.append("steps", String(p.steps)); fd.append("strength", String(p.strength));
+  fd.append("mode", task); fd.append("strength", String(p.strength));
   const r = await fetch("/api/process", { method: "POST", body: fd });
   if (!r.ok) {
     let m = r.statusText;

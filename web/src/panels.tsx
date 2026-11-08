@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Alert, Badge, Button, Card, Progress, RadioGroup, Select } from "./ui/components";
+import { Alert, Button, Card, Progress, RadioGroup } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
 import { refBlobOf, refRangeOf, statusOf, TASK_LABEL, useApp, type NodeId, type Range, type Result, type Task } from "./state";
 import type WaveSurfer from "wavesurfer.js";
@@ -43,9 +43,9 @@ function FilePick({ label, onFile }: { label: string; onFile: (f: File) => void 
 export function Hub() {
   const { s } = useApp();
   const next: [string, NodeId] = statusOf(s, "source") !== "완료" ? ["다음: 원본 오디오 불러오기", "source"]
-    : statusOf(s, "reference") !== "완료" ? ["다음: 기준 목소리 지정", "reference"] : ["추천: 목소리 제거 해 보기", "remove"];
+    : statusOf(s, "reference") !== "완료" ? ["다음: 기준 목소리 지정", "reference"] : ["추천: 목소리 크기 조절 해 보기", "remove"];
   return (
-    <Panel title="작업 공간" purpose="원본 오디오와 기준 목소리를 정한 뒤 기능을 고르세요."
+    <Panel title="작업 공간" purpose="원본 오디오와 기준 목소리를 정한 뒤 크기를 조절하세요."
       cta={<Button onClick={() => go(next[1])}>{next[0]}</Button>}>
       <div className="vk-hub">
         {NODES.map((n) => (
@@ -133,8 +133,7 @@ export function ReferencePanel() {
   );
 }
 
-function ResultBlock({ task, res }: { task: Task; res: Result }) {
-  const { dispatch } = useApp();
+function ResultBlock({ res }: { res: Result }) {
   const out = useRef<WaveSurfer | null>(null), orig = useRef<HTMLAudioElement>(null);
   const [side, setSide] = useState<"A" | "B">("A");
   // A/B: original 처리 구간 (A) vs result (B); both play from the same offset within the 처리 구간
@@ -147,9 +146,8 @@ function ResultBlock({ task, res }: { task: Task; res: Result }) {
   }
   return (
     <div className="vk-result" aria-label="결과">
-      <div className="vk-row"><h2 className="vk-title">결과</h2>{task === "convert" && <Badge tone="warning">합성 음성</Badge>}
+      <div className="vk-row"><h2 className="vk-title">결과</h2>
         <span className="vk-muted">{new Date(res.createdAt).toLocaleTimeString("ko-KR")}</span></div>
-      {task === "convert" && <p className="vk-muted" style={{ margin: 0 }}>AI로 변환된 목소리입니다.</p>}
       <Waveform blob={res.blob} kind="result" label="결과" wsRef={out} />
       <audio ref={orig} src={res.origUrl} hidden />
       <div className="vk-row">
@@ -157,49 +155,42 @@ function ResultBlock({ task, res }: { task: Task; res: Result }) {
           {side === "A" ? "원본(A) 재생 중 - 눌러서 결과(B)로 전환" : "결과(B) 재생 중 - 눌러서 원본(A)로 전환"}
         </Button>
         <a className="gc-button gc-button-secondary" href={res.url} download="result.wav">다운로드</a>
-        {task === "extract" && (
-          <Button variant="secondary" onClick={() => { dispatch({ type: "refFile", blob: res.blob, name: "추출 결과" }); go("reference"); }}>이 결과를 기준 목소리로 쓰기</Button>
-        )}
       </div>
     </div>
   );
 }
 
-const PURPOSE: Record<Task, string> = {
-  extract: "기준 목소리와 같은 화자의 목소리만 남깁니다.",
-  remove: "기준 목소리와 같은 화자의 목소리를 지웁니다.",
-  convert: "원본 오디오의 목소리를 기준 목소리로 바꿉니다.",
-};
+// Slider u in [-1, 1]: left = reduce, middle = unchanged, right = boost. Server strength: 1 .. 0 .. -4.
+const strengthOf = (u: number) => (u <= 0 ? -u : -4 * u);
+// Measured on a controlled mix (wiki gain-sweep): reduce 1 -> -25 dB, boost 1 -> +5.8 dB, boost 4 -> +13.6 dB.
+function describe(u: number) {
+  const k = strengthOf(u);
+  if (k === 0) return "그대로";
+  if (k > 0) return k >= 1 ? "최대로 줄임 (약 −25 dB)" : `줄이기 ${Math.round(k * 100)}%`;
+  return `키우기 약 +${(20 * Math.log10(1 - k)).toFixed(1)} dB`;
+}
 
 export function TaskPanel({ task }: { task: Task }) {
   const { s, run } = useApp();
-  const [strength, setStrength] = useState(1);
-  const [steps, setSteps] = useState("10");
-  const running = !!s.running[task], otherRunning = Object.values(s.running).some(Boolean) && !running;
+  const [u, setU] = useState(-1);
+  const running = !!s.running[task];
   const res = s.results[task], err = s.errors[task];
   const missing: NodeId[] = [];
   if (statusOf(s, "source") !== "완료") missing.push("source");
   if (statusOf(s, "reference") !== "완료") missing.push("reference");
-  const exec = () => run(task, { strength, steps: +steps });
+  const exec = () => run(task, { strength: strengthOf(u) });
   return (
-    <Panel title={TASK_LABEL[task]} purpose={PURPOSE[task]}
-      cta={res ? <Button onClick={() => go("hub")}>다른 작업 하기</Button> : <Button isLoading={running} disabled={missing.length > 0 || otherRunning} onClick={exec}>실행</Button>}>
+    <Panel title={TASK_LABEL[task]} purpose="기준 목소리와 같은 화자의 목소리 크기를 줄이거나 키웁니다."
+      cta={res ? undefined : <Button isLoading={running} disabled={missing.length > 0} onClick={exec}>실행</Button>}>
       {missing.length > 0 && <Missing items={missing} />}
-      {task === "remove" && (
-        <div className="vk-field"><label htmlFor="strength">강도 <output className="vk-metric" style={{ fontSize: "inherit" }}>{strength.toFixed(2)}</output></label>
-          <input id="strength" type="range" min={0} max={1} step={0.05} value={strength} onChange={(e) => setStrength(+e.target.value)} /></div>
-      )}
-      {task === "convert" && (
-        <>
-          <Select label="품질" value={steps} onValueChange={setSteps} options={[{ value: "10", label: "품질 (10)" }, { value: "4", label: "빠름 (4)" }]} />
-          <p className="vk-muted" style={{ margin: 0 }}>원본 오디오의 처리 구간 = 바꿀 목소리, 기준 목소리 = 닮을 목소리. 합성 음성이 만들어지며 음원 길이의 약 2~3배가 걸릴 수 있습니다.</p>
-        </>
-      )}
-      {otherRunning && <p className="vk-muted" style={{ margin: 0 }}>다른 작업이 실행 중입니다. 끝나면 실행할 수 있습니다.</p>}
-      {running && <Progress label={task === "convert" ? "변환 중 (음원 길이의 2~3배)" : "처리 중"} size="thin" />}
+      <div className="vk-field"><label htmlFor="strength">크기 <output className="vk-metric" style={{ fontSize: "inherit" }}>{describe(u)}</output></label>
+        <input id="strength" type="range" min={-1} max={1} step={0.05} value={u} onChange={(e) => setU(+e.target.value)} />
+        <div className="vk-row" style={{ justifyContent: "space-between" }}><span className="vk-muted">줄이기</span><span className="vk-muted">그대로</span><span className="vk-muted">키우기</span></div></div>
+      {u > 0 && <p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
+      {running && <Progress label="처리 중" size="thin" />}
       {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={running || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}
-      {res && <ResultBlock key={res.createdAt} task={task} res={res} />}
-      {res && <div><Button variant="secondary" isLoading={running} disabled={missing.length > 0 || otherRunning} onClick={exec}>다시 실행</Button></div>}
+      {res && <ResultBlock key={res.createdAt} res={res} />}
+      {res && <div><Button variant="secondary" isLoading={running} disabled={missing.length > 0} onClick={exec}>다시 실행</Button></div>}
     </Panel>
   );
 }

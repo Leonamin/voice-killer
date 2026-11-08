@@ -2,7 +2,23 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Card, Select } from "./ui/components";
 import type { Range } from "./state";
 
-type Found = { speakers: { id: number; total: number; is_minor: boolean; candidates: Range[] }[]; overlaps: Range[] };
+type Speaker = { id: number; total: number; is_minor: boolean; candidates: Range[]; from?: number[] };
+type Found = { speakers: Speaker[]; overlaps: Range[] };
+const MINOR_TOTAL = 5, PER_SPEAKER = 5; // keep in step with candidates.py
+
+/** Fold voices the user marked as the same person: root id -> one voice with summed time and the longest spans. */
+function fold(speakers: Speaker[], link: Record<number, number>): Speaker[] {
+  const root = (id: number): number => (link[id] && link[id] !== id ? root(link[id]) : id);
+  const by = new Map<number, Speaker>();
+  for (const sp of speakers) {
+    const r = root(sp.id), cur = by.get(r);
+    by.set(r, cur ? { ...cur, total: cur.total + sp.total, candidates: [...cur.candidates, ...sp.candidates], from: [...cur.from!, sp.id] } : { ...sp, id: r, from: [sp.id] });
+  }
+  return [...by.values()].map((sp) => ({
+    ...sp, is_minor: sp.total < MINOR_TOTAL,
+    candidates: sp.candidates.sort((a, b) => b.end - b.start - (a.end - a.start)).slice(0, PER_SPEAKER),
+  })).sort((a, b) => b.total - a.total);
+}
 const cache = new WeakMap<Blob, { key: string; found: Found }>(); // survives leaving the panel; a new source Blob drops it
 
 /** Add-on above the reference picker: finds single-speaker spans to audition. Picking one only sets the reference range. */
@@ -13,6 +29,8 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [playing, setPlaying] = useState<Range | null>(null);
+  const [link, setLink] = useState<Record<number, number>>({}); // voice id -> voice it was merged into
+  const [sel, setSel] = useState<number[]>([]); // checked voices (folded ids)
   const audio = useRef<HTMLAudioElement>(null), stopAt = useRef(0);
   useEffect(() => { const u = URL.createObjectURL(blob); audio.current!.src = u; return () => URL.revokeObjectURL(u); }, [blob]);
   useEffect(() => { const h = cache.get(blob); setFound(h?.key === key ? h.found : null); }, [blob, key]);
@@ -29,7 +47,7 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
         throw new Error(m);
       }
       const f = (await r.json()) as Found;
-      cache.set(blob, { key, found: f }); setFound(f);
+      cache.set(blob, { key, found: f }); setFound(f); setLink({}); setSel([]);
     } catch (e) { setError((e as Error).message); }
     finally { setIsLoading(false); }
   }
@@ -40,9 +58,12 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
     stopAt.current = c.end; a.currentTime = c.start; void a.play(); setPlaying(c);
   }
 
-  const speaker = (sp: Found["speakers"][number]) => (
+  const merge = () => { const r = Math.min(...sel); setLink((l) => ({ ...l, ...Object.fromEntries(sel.filter((i) => i !== r).map((i) => [i, r])) })); setSel([]); };
+  const speakers = found ? fold(found.speakers, link) : [];
+  const speaker = (sp: Speaker) => (
     <div key={sp.id} className="vk-field">
-      <strong>목소리 {sp.id}</strong> <span className="vk-muted">혼자 말한 구간 합계 {sp.total.toFixed(0)}초</span>
+      <label><input type="checkbox" checked={sel.includes(sp.id)} onChange={(e) => setSel((a) => (e.target.checked ? [...a, sp.id] : a.filter((i) => i !== sp.id)))} /> <strong>목소리 {sp.id}</strong></label>{" "}
+      <span className="vk-muted">혼자 말한 구간 합계 {sp.total.toFixed(0)}초{sp.from && sp.from.length > 1 ? ` · 합침: ${sp.from.join("+")}` : ""}</span>
       {sp.candidates.map((c) => (
         <div key={c.start} className="vk-row">
           <span className="vk-clock">{c.start.toFixed(1)}초 – {c.end.toFixed(1)}초</span>
@@ -61,14 +82,15 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
       <div className="vk-row"><Button variant="secondary" isLoading={isLoading} onClick={search}>{found ? "다시 찾기" : "후보 찾기"}</Button></div>
       {error && <Alert tone="danger" title="후보를 찾지 못했습니다">{error}</Alert>}
       {found && found.speakers.length === 0 && <Alert tone="warning" title="후보 없음">한 사람만 말하는 구간(2초 이상)을 찾지 못했습니다. 아래에서 직접 지정하세요.</Alert>}
-      {found?.speakers.filter((sp) => !sp.is_minor).map(speaker)}
-      {found && found.speakers.some((sp) => sp.is_minor) && (
+      {sel.length > 1 && <div className="vk-row"><Button variant="secondary" onClick={merge}>선택한 {sel.length}개를 같은 사람으로 합치기</Button></div>}
+      {speakers.filter((sp) => !sp.is_minor).map(speaker)}
+      {speakers.some((sp) => sp.is_minor) && (
         <details>
-          <summary className="vk-muted">말한 양이 적은 목소리 {found.speakers.filter((sp) => sp.is_minor).length}개 (잡음이거나 같은 사람의 일부일 수 있음)</summary>
-          {found.speakers.filter((sp) => sp.is_minor).map(speaker)}
+          <summary className="vk-muted">말한 양이 적은 목소리 {speakers.filter((sp) => sp.is_minor).length}개 (잡음이거나 같은 사람의 일부일 수 있음)</summary>
+          {speakers.filter((sp) => sp.is_minor).map(speaker)}
         </details>
       )}
-      {found && found.speakers.length > 0 && <p className="vk-muted" style={{ margin: 0 }}>자동 분류라 같은 사람이 둘로 나뉘거나 다른 사람이 섞일 수 있습니다. 직접 들어 보고 고르세요.</p>}
+      {found && found.speakers.length > 0 && <p className="vk-muted" style={{ margin: 0 }}>자동 분류라 같은 사람이 둘로 나뉘거나 다른 사람이 섞일 수 있습니다. 같은 사람이 나뉘었으면 목소리 옆 칸을 체크하고 "합치기"를 누르세요. 직접 들어 보고 고르세요.</p>}
       <audio ref={audio} hidden onTimeUpdate={() => { const a = audio.current!; if (playing && a.currentTime >= stopAt.current) { a.pause(); setPlaying(null); } }} onEnded={() => setPlaying(null)} />
     </Card>
   );
