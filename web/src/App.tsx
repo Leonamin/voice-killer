@@ -2,13 +2,13 @@ import { useState, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import { Badge, Button, Drawer, ToastProvider } from "./ui/components";
 import { AppProvider, statusOf, useApp, type NodeId, type Status } from "./state";
-import { Hub, ReferencePanel, SourcePanel, TaskPanel } from "./panels";
+import { AdjustPanel, Hub, ReferencePanel, SourcePanel } from "./panels";
 import { Help } from "./Help";
 
 export const NODES: { id: NodeId; label: string; desc: string; group: string }[] = [
   { id: "source", label: "원본 오디오", desc: "처리할 오디오와 처리 구간", group: "준비" },
   { id: "reference", label: "기준 목소리", desc: "대상 목소리가 혼자 말하는 구간 (같은 파일 또는 다른 파일)", group: "준비" },
-  { id: "remove", label: "목소리 크기 조절", desc: "기준 목소리와 같은 사람의 목소리를 줄이거나 키웁니다", group: "기능" },
+  { id: "adjust", label: "목소리 크기 조절", desc: "기준 목소리와 같은 사람의 목소리를 줄이거나 키웁니다", group: "기능" },
 ];
 export const labelOf = (id: NodeId) => NODES.find((n) => n.id === id)!.label;
 
@@ -70,7 +70,7 @@ function Shell() {
       </header>
       <main className="vk-main">
         {route === "hub" ? <Hub /> : route === "help" ? <Help /> : route === "source" ? <SourcePanel /> : route === "reference" ? <ReferencePanel />
-          : <TaskPanel key={route} task={route} />}
+          : <AdjustPanel />}
       </main>
     </div>
   );

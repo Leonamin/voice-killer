@@ -1,4 +1,4 @@
-"""Suppression operates on estimated target components, never whole speech intervals."""
+"""Level changes operate on estimated target components, never whole speech intervals."""
 import math
 import numpy as np
 from scipy import signal

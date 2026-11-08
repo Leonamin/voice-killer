@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Button, Card, Progress, RadioGroup, Slider } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
-import { refBlobOf, refRangeOf, statusOf, TASK_LABEL, useApp, type NodeId, type Range, type Result, type Task } from "./state";
+import { refBlobOf, refRangeOf, statusOf, ADJUST_LABEL, useApp, type NodeId, type Range, type Result } from "./state";
 import type WaveSurfer from "wavesurfer.js";
 import { Waveform } from "./Waveform";
 import { Candidates } from "./Candidates";
@@ -43,7 +43,7 @@ function FilePick({ label, onFile }: { label: string; onFile: (f: File) => void 
 export function Hub() {
   const { s } = useApp();
   const next: [string, NodeId] = statusOf(s, "source") !== "완료" ? ["다음: 원본 오디오 불러오기", "source"]
-    : statusOf(s, "reference") !== "완료" ? ["다음: 기준 목소리 지정", "reference"] : ["추천: 목소리 크기 조절 해 보기", "remove"];
+    : statusOf(s, "reference") !== "완료" ? ["다음: 기준 목소리 지정", "reference"] : ["추천: 목소리 크기 조절 해 보기", "adjust"];
   return (
     <Panel title="작업 공간" purpose="원본 오디오와 기준 목소리를 정한 뒤 크기를 조절하세요."
       cta={<Button onClick={() => go(next[1])}>{next[0]}</Button>}>
@@ -170,28 +170,27 @@ function describe(u: number) {
   return `키우기 약 +${(20 * Math.log10(1 - k)).toFixed(1)} dB`;
 }
 
-export function TaskPanel({ task }: { task: Task }) {
+export function AdjustPanel() {
   const { s, run } = useApp();
   const [u, setU] = useState(0); // starts at the centre = unchanged
-  const running = !!s.running[task];
-  const res = s.results[task], err = s.errors[task];
+  const { isRunning, result: res, error: err } = s;
   const missing: NodeId[] = [];
   if (statusOf(s, "source") !== "완료") missing.push("source");
   if (statusOf(s, "reference") !== "완료") missing.push("reference");
-  const exec = () => run(task, { strength: strengthOf(u) });
+  const exec = () => run({ strength: strengthOf(u) });
   return (
-    <Panel title={TASK_LABEL[task]} purpose="기준 목소리와 같은 화자의 목소리 크기를 줄이거나 키웁니다."
-      cta={res ? undefined : <Button isLoading={running} disabled={missing.length > 0 || u === 0} onClick={exec}>실행</Button>}>
+    <Panel title={ADJUST_LABEL} purpose="기준 목소리와 같은 화자의 목소리 크기를 줄이거나 키웁니다."
+      cta={res ? undefined : <Button isLoading={isRunning} disabled={missing.length > 0 || u === 0} onClick={exec}>실행</Button>}>
       {missing.length > 0 && <Missing items={missing} />}
       <div className="vk-centered" data-side={u < 0 ? "reduce" : u > 0 ? "boost" : undefined}>
         <Slider label="크기" min={-1} max={1} step={0.05} value={u} onValueChange={setU} valueText={describe(u)}
           description="왼쪽으로 밀면 줄이고, 가운데는 그대로, 오른쪽으로 밀면 키웁니다." />
       </div>
       {u > 0 && <p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
-      {running && <Progress label="처리 중" size="thin" />}
-      {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={running || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}
+      {isRunning && <Progress label="처리 중" size="thin" />}
+      {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={isRunning || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}
       {res && <ResultBlock key={res.createdAt} res={res} />}
-      {res && <div><Button variant="secondary" isLoading={running} disabled={missing.length > 0} onClick={exec}>다시 실행</Button></div>}
+      {res && <div><Button variant="secondary" isLoading={isRunning} disabled={missing.length > 0} onClick={exec}>다시 실행</Button></div>}
     </Panel>
   );
 }

@@ -51,8 +51,8 @@ def main():
     parser.add_argument("--threads", type=int, default=6)
     parser.add_argument("--force", action="store_true", dest="should_overwrite")
     args = parser.parse_args()
-    if not 0 <= args.strength <= 1 or not np.isfinite(args.strength):
-        parser.error("strength must be in [0, 1]")
+    if not -4 <= args.strength <= 1 or not np.isfinite(args.strength):
+        parser.error("strength must be in [-4, 1] (negative boosts the target)")
     if args.mask_power <= 0 or not np.isfinite(args.mask_power):
         parser.error("mask-power must be positive and finite")
     if not 0 < args.hard_threshold <= 1 or not np.isfinite(args.hard_threshold):
