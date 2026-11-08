@@ -85,3 +85,10 @@ a.gc-button { text-decoration: none; }
 .vk-play { min-width: 8.5em; }
 .vk-clock { font-variant-numeric: tabular-nums; font-family: var(--vk-font-mono, ui-monospace, monospace); min-width: 15ch; }
 .vk-volume input[type=range] { width: 100%; max-width: 320px; accent-color: var(--vk-primary); }
+
+/* Centre-origin slider: colour the track from the middle to the thumb, not from the left edge. */
+.vk-centered .gc-slider-input {
+  --gc-slider-bg: linear-gradient(to right,
+    var(--gc-progress-track) min(50%, var(--gc-slider-fill)), var(--gc-accent) min(50%, var(--gc-slider-fill)),
+    var(--gc-accent) max(50%, var(--gc-slider-fill)), var(--gc-progress-track) max(50%, var(--gc-slider-fill)));
+}

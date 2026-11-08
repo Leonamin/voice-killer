@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Alert, Button, Card, Progress, RadioGroup } from "./ui/components";
+import { Alert, Button, Card, Progress, RadioGroup, Slider } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
 import { refBlobOf, refRangeOf, statusOf, TASK_LABEL, useApp, type NodeId, type Range, type Result, type Task } from "./state";
 import type WaveSurfer from "wavesurfer.js";
@@ -172,7 +172,7 @@ function describe(u: number) {
 
 export function TaskPanel({ task }: { task: Task }) {
   const { s, run } = useApp();
-  const [u, setU] = useState(-1);
+  const [u, setU] = useState(0); // starts at the centre = unchanged
   const running = !!s.running[task];
   const res = s.results[task], err = s.errors[task];
   const missing: NodeId[] = [];
@@ -181,11 +181,12 @@ export function TaskPanel({ task }: { task: Task }) {
   const exec = () => run(task, { strength: strengthOf(u) });
   return (
     <Panel title={TASK_LABEL[task]} purpose="기준 목소리와 같은 화자의 목소리 크기를 줄이거나 키웁니다."
-      cta={res ? undefined : <Button isLoading={running} disabled={missing.length > 0} onClick={exec}>실행</Button>}>
+      cta={res ? undefined : <Button isLoading={running} disabled={missing.length > 0 || u === 0} onClick={exec}>실행</Button>}>
       {missing.length > 0 && <Missing items={missing} />}
-      <div className="vk-field"><label htmlFor="strength">크기 <output className="vk-metric" style={{ fontSize: "inherit" }}>{describe(u)}</output></label>
-        <input id="strength" type="range" min={-1} max={1} step={0.05} value={u} onChange={(e) => setU(+e.target.value)} />
-        <div className="vk-row" style={{ justifyContent: "space-between" }}><span className="vk-muted">줄이기</span><span className="vk-muted">그대로</span><span className="vk-muted">키우기</span></div></div>
+      <div className="vk-centered">
+        <Slider label="크기" min={-1} max={1} step={0.05} value={u} onValueChange={setU} valueText={describe(u)}
+          description="왼쪽으로 밀면 줄이고, 가운데는 그대로, 오른쪽으로 밀면 키웁니다." />
+      </div>
       {u > 0 && <p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
       {running && <Progress label="처리 중" size="thin" />}
       {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={running || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}

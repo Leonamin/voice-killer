@@ -671,3 +671,4 @@ export function Grid({
 export function Divider() {
   return <hr className="gc-divider" />;
 }
+export * from "./slider";
