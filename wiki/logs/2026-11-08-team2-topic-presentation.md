@@ -21,3 +21,5 @@ okf_version: "0.1"
 - 정리: 옛 전용 터널 voice-killer와 voice-killer-tunnel 서비스 삭제
 - 남김: `.venv-seedvc`, `vendor/seed-vc`는 디스크에 그대로 있다. 기록은 references/vc-spike.md에 남는다.
 
+- 디자인: 줄이기·키우기 색 토큰(DESIGN.md reduce/boost, theme.css --vk-reduce/--vk-boost), 라우트 `#/remove`를 `#/adjust`로 변경
+- 리팩토링: web/src/state.tsx를 단일 작업(result, isRunning, error)으로 단순화, CLI strength 범위 [-4, 1]
