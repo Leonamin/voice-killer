@@ -136,3 +136,5 @@ a.gc-button { text-decoration: none; }
 .vk-table th:first-child, .vk-table td:first-child { text-align: left; }
 .vk-table th { color: var(--vk-text-muted); font-size: var(--vk-label-size); font-weight: var(--vk-label-weight); }
 .vk-notes { margin: 0; padding-left: 20px; }
+
+.vk-hub .gc-card > div:empty { display: none; }

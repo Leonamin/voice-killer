@@ -23,7 +23,6 @@ export function Help() {
     <section className="vk-panel" aria-labelledby="panel-title">
       <header>
         <h1 id="panel-title" className="vk-display">사용법</h1>
-        <p>화면 순서대로 따라 하면 됩니다. 아래 화면은 스티브 잡스 발표 60초 데모 파일로 찍었습니다.</p>
       </header>
 
       <Alert tone="neutral" title="먼저 알아 둘 것">
@@ -61,7 +60,6 @@ export function Help() {
       </ol>
 
       <h2 className="vk-title">3. 목소리 크기 조절하기</h2>
-      <p className="vk-muted" style={{ margin: 0 }}>원본 오디오와 기준 목소리가 없어도 메뉴는 열립니다. 이때는 무엇이 빠졌는지 알려 주고, 바로 가는 버튼을 보여 줍니다.</p>
       <ol className="vk-steps">
         <Step n={1} title="크기를 정하고 실행" img={removeBefore} alt="목소리 크기 조절 화면: 크기 슬라이더와 실행 버튼">
           슬라이더는 <b>가운데(그대로)</b>에서 시작합니다. <b>왼쪽</b>으로 밀면 대상 목소리를 줄이고, <b>오른쪽</b>으로 밀면 키웁니다. 옆에 보이는 dB 수치는 시험 한 건에서 잰 값이라 파일마다 다를 수 있습니다.

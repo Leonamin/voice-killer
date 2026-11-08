@@ -76,7 +76,7 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
 
   return (
     <Card title="기준 목소리 후보 찾기">
-      <p className="vk-muted" style={{ margin: 0 }}>처리 구간에서 한 사람만 말하는 구간을 자동으로 찾아 들려 줍니다. 10분 분량에 1분 가까이 걸릴 수 있고, 고르지 않아도 아래에서 직접 지정할 수 있습니다.</p>
+      <p className="vk-muted" style={{ margin: 0 }}>한 사람만 말하는 구간을 찾습니다. 10분 분량에 1분 가까이 걸릴 수 있습니다.</p>
       <Select label="화자 수" value={count} onValueChange={setCount}
         options={[{ value: "0", label: "자동" }, ...[1, 2, 3, 4, 5, 6].map((n) => ({ value: String(n), label: `${n}명` }))]} />
       <div className="vk-row"><Button variant="secondary" isLoading={isLoading} onClick={search}>{found ? "다시 찾기" : "후보 찾기"}</Button></div>
@@ -90,7 +90,7 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
           {speakers.filter((sp) => sp.is_minor).map(speaker)}
         </details>
       )}
-      {found && found.speakers.length > 0 && <p className="vk-muted" style={{ margin: 0 }}>자동 분류라 같은 사람이 둘로 나뉘거나 다른 사람이 섞일 수 있습니다. 같은 사람이 나뉘었으면 목소리 옆 칸을 체크하고 "합치기"를 누르세요. 직접 들어 보고 고르세요.</p>}
+      {found && found.speakers.length > 0 && <p className="vk-muted" style={{ margin: 0 }}>자동 분류라 같은 사람이 둘로 나뉘거나 다른 사람이 섞일 수 있습니다. 같은 사람이 나뉘었으면 목소리 옆 칸을 체크하고 "합치기"를 누르세요.</p>}
       <audio ref={audio} hidden onTimeUpdate={() => { const a = audio.current!; if (playing && a.currentTime >= stopAt.current) { a.pause(); setPlaying(null); } }} onEnded={() => setPlaying(null)} />
     </Card>
   );

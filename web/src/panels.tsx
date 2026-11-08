@@ -9,10 +9,10 @@ import { describe, strengthOf } from "./strength";
 
 const fmt = (r: Range | null) => (r ? `${r.start.toFixed(2)}초 – ${r.end.toFixed(2)}초 (${(r.end - r.start).toFixed(2)}초)` : "-");
 
-function Panel({ title, purpose, cta, children }: { title: string; purpose: string; cta?: ReactNode; children: ReactNode }) {
+function Panel({ title, purpose, cta, children }: { title: string; purpose?: string; cta?: ReactNode; children: ReactNode }) {
   return (
     <section className="vk-panel" aria-labelledby="panel-title">
-      <header><h1 id="panel-title" className="vk-display">{title}</h1><p>{purpose}</p></header>
+      <header><h1 id="panel-title" className="vk-display">{title}</h1>{purpose && <p>{purpose}</p>}</header>
       {children}
       {cta && <div className="vk-cta">{cta}</div>}
     </section>
@@ -46,13 +46,11 @@ export function Hub() {
   const next: [string, NodeId] = statusOf(s, "source") !== "완료" ? ["다음: 원본 오디오 불러오기", "source"]
     : statusOf(s, "reference") !== "완료" ? ["다음: 기준 목소리 지정", "reference"] : ["추천: 목소리 크기 조절 해 보기", "adjust"];
   return (
-    <Panel title="작업 공간" purpose="원본 오디오와 기준 목소리를 정한 뒤 크기를 조절하세요."
+    <Panel title="작업 공간"
       cta={<Button onClick={() => go(next[1])}>{next[0]}</Button>}>
       <div className="vk-hub">
         {NODES.map((n) => (
-          <Card key={n.id} title={<><a className="vk-stretch" href={`#/${n.id}`}>{n.label}</a><StatusBadge status={statusOf(s, n.id)} /></>}>
-            <span className="vk-muted">{n.desc}</span>
-          </Card>
+          <Card key={n.id} title={<><a className="vk-stretch" href={`#/${n.id}`}>{n.label}</a><StatusBadge status={statusOf(s, n.id)} /></>}>{null}</Card>
         ))}
       </div>
     </Panel>
@@ -84,7 +82,7 @@ export function SourcePanel() {
   }
 
   return (
-    <Panel title="원본 오디오" purpose="처리할 오디오를 올리거나 녹음하고, 결과를 만들 구간을 정합니다."
+    <Panel title="원본 오디오"
       cta={<Button onClick={() => go("reference")}>다음: 기준 목소리 지정</Button>}>
       <div className="vk-row">
         <FilePick label="파일 올리기" onFile={(f) => { setError(""); dispatch({ type: "source", blob: f, name: f.name }); }} />
@@ -98,7 +96,7 @@ export function SourcePanel() {
           <Waveform blob={src.blob} range={src.range} initial={(d) => ({ start: 0, end: d })} kind="process" label="처리 구간" note={`처리 구간 ${fmt(src.range)}`}
             onReady={(duration) => dispatch({ type: "sourceReady", duration })} onRange={(range) => dispatch({ type: "sourceRange", range })} />
         </>
-      ) : <p className="vk-muted">아직 불러온 오디오가 없습니다.</p>}
+      ) : null}
     </Panel>
   );
 }
@@ -170,7 +168,7 @@ export function AdjustPanel() {
   if (statusOf(s, "reference") !== "완료") missing.push("reference");
   const exec = () => run({ strength: strengthOf(u) });
   return (
-    <Panel title={ADJUST_LABEL} purpose="기준 목소리와 같은 화자의 목소리 크기를 줄이거나 키웁니다."
+    <Panel title={ADJUST_LABEL}
       cta={res ? undefined : <Button isLoading={isRunning} disabled={missing.length > 0 || u === 0} onClick={exec}>실행</Button>}>
       {missing.length > 0 && <Missing items={missing} />}
       <div className="vk-centered" data-side={u < 0 ? "reduce" : u > 0 ? "boost" : undefined}>
