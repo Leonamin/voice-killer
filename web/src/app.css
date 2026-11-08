@@ -92,3 +92,5 @@ a.gc-button { text-decoration: none; }
     var(--gc-progress-track) min(50%, var(--gc-slider-fill)), var(--gc-accent) min(50%, var(--gc-slider-fill)),
     var(--gc-accent) max(50%, var(--gc-slider-fill)), var(--gc-progress-track) max(50%, var(--gc-slider-fill)));
 }
+/* Reduce side reads blue, boost side keeps the accent, so the direction is visible without reading the label. */
+.vk-centered[data-side="reduce"] { --gc-accent: #4f8cff; --gc-focus: #4f8cff; }

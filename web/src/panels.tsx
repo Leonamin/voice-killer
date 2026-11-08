@@ -183,7 +183,7 @@ export function TaskPanel({ task }: { task: Task }) {
     <Panel title={TASK_LABEL[task]} purpose="기준 목소리와 같은 화자의 목소리 크기를 줄이거나 키웁니다."
       cta={res ? undefined : <Button isLoading={running} disabled={missing.length > 0 || u === 0} onClick={exec}>실행</Button>}>
       {missing.length > 0 && <Missing items={missing} />}
-      <div className="vk-centered">
+      <div className="vk-centered" data-side={u < 0 ? "reduce" : u > 0 ? "boost" : undefined}>
         <Slider label="크기" min={-1} max={1} step={0.05} value={u} onValueChange={setU} valueText={describe(u)}
           description="왼쪽으로 밀면 줄이고, 가운데는 그대로, 오른쪽으로 밀면 키웁니다." />
       </div>
