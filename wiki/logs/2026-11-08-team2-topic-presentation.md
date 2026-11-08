@@ -23,3 +23,4 @@ okf_version: "0.1"
 
 - 디자인: 줄이기·키우기 색 토큰(DESIGN.md reduce/boost, theme.css --vk-reduce/--vk-boost), 라우트 `#/remove`를 `#/adjust`로 변경
 - 리팩토링: web/src/state.tsx를 단일 작업(result, isRunning, error)으로 단순화, CLI strength 범위 [-4, 1]
+- 화면: `#/how` "원리와 구조" 페이지 추가(web/src/How.tsx, Arch.tsx). 구조 그림은 stack-diagram 스킬로 배치하고 TSX로 옮겼다. 원리 설명과 칸 모형은 ~/study/decks/voice-killer-suppression 덱의 내용과 격자 그림 아이디어를 가져와 다시 썼다(덱 엔진 deck-kit은 쓰지 않음).

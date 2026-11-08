@@ -95,3 +95,44 @@ a.gc-button { text-decoration: none; }
 /* Direction reads from colour (DESIGN.md reduce/boost), not only from the label. */
 .vk-centered[data-side="reduce"] { --gc-accent: var(--vk-reduce); --gc-focus: var(--vk-reduce); }
 .vk-centered[data-side="boost"] { --gc-accent: var(--vk-boost); }
+
+/* 구조 그림 (stack-diagram). 색은 토큰만 쓴다. 타일은 로고가 보이도록 흰색을 유지한다. */
+.vk-arch { margin: 0; display: flex; flex-direction: column; gap: var(--vk-space-sm); min-width: 0; }
+.vk-arch-scroll { overflow-x: auto; border: 1px solid var(--vk-border); border-radius: var(--vk-rounded-md); background: var(--vk-bg); }
+.vk-arch-canvas { position: relative; overflow: hidden; transform-origin: 0 0; }
+.vk-arch-draw { position: absolute; }
+.vk-arch-canvas svg { position: absolute; inset: 0; pointer-events: none; }
+.vk-arch-group { position: absolute; border: 1.5px solid var(--vk-primary); border-radius: var(--vk-rounded-md); background: var(--vk-primary-soft); }
+.vk-arch-group span { position: absolute; top: 12px; left: 12px; font-size: var(--vk-label-size); font-weight: 600; color: var(--vk-primary); }
+.vk-arch-node { position: absolute; width: 132px; text-align: center; }
+.vk-arch-tile { width: 60px; height: 60px; margin: 0 auto; display: grid; place-items: center; border-radius: var(--vk-rounded-md); background: #fff; }
+.vk-arch-tile img { width: 34px; height: 34px; object-fit: contain; }
+.vk-arch-tile.is-wide img { width: 48px; }
+.vk-arch-name { margin-top: var(--vk-space-sm); font-size: 14px; font-weight: 600; }
+.vk-arch-role { margin-top: 2px; font-size: 12px; color: var(--vk-text-muted); }
+.vk-edge-main { stroke: var(--vk-primary); stroke-width: 1.6; fill: none; }
+.vk-edge-side { stroke: var(--vk-text-muted); stroke-width: 1.4; fill: none; }
+.vk-edge-label { font-size: 12px; paint-order: stroke; stroke: var(--vk-bg); stroke-width: 4px; stroke-linejoin: round; }
+.vk-edge-label-main { fill: var(--vk-primary); }
+.vk-edge-label-side { fill: var(--vk-text-muted); }
+.vk-arch figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: var(--vk-space-xs) var(--vk-space-md); font-size: var(--vk-label-size); }
+.vk-legend { display: inline-block; width: 28px; margin-right: var(--vk-space-sm); vertical-align: middle; border-top: 2px solid; }
+.vk-legend-main { border-color: var(--vk-primary); }
+.vk-legend-side { border-color: var(--vk-text-muted); }
+
+/* 원리와 구조 페이지 */
+.vk-more { border: 1px solid var(--vk-border); border-radius: var(--vk-rounded-md); background: var(--vk-surface-subtle); padding: var(--vk-space-sm) var(--vk-space-md); }
+.vk-more summary { cursor: pointer; font-size: var(--vk-label-size); font-weight: var(--vk-label-weight); color: var(--vk-text-muted); }
+.vk-more p { margin: var(--vk-space-sm) 0 0; }
+.vk-how-demo { display: flex; flex-direction: column; gap: var(--vk-space-lg); }
+.vk-grid { display: grid; grid-template-columns: repeat(28, 1fr); gap: 2px; padding: var(--vk-space-sm); background: var(--vk-bg); border: 1px solid var(--vk-border); border-radius: var(--vk-rounded-md); }
+.vk-grid i { aspect-ratio: 1; border-radius: 2px; transition: opacity 120ms; }
+.vk-grid .is-voice { background: var(--vk-primary); }
+.vk-grid .is-other { background: var(--vk-text-muted); }
+@media (prefers-reduced-motion: reduce) { .vk-grid i { transition: none; } }
+.vk-table-wrap { overflow-x: auto; }
+.vk-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.vk-table th, .vk-table td { padding: var(--vk-space-sm) var(--vk-space-md); border-bottom: 1px solid var(--vk-border); text-align: right; white-space: nowrap; }
+.vk-table th:first-child, .vk-table td:first-child { text-align: left; }
+.vk-table th { color: var(--vk-text-muted); font-size: var(--vk-label-size); font-weight: var(--vk-label-weight); }
+.vk-notes { margin: 0; padding-left: 20px; }

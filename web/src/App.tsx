@@ -4,6 +4,7 @@ import { Badge, Button, Drawer, ToastProvider } from "./ui/components";
 import { AppProvider, statusOf, useApp, type NodeId, type Status } from "./state";
 import { AdjustPanel, Hub, ReferencePanel, SourcePanel } from "./panels";
 import { Help } from "./Help";
+import { How } from "./How";
 
 export const NODES: { id: NodeId; label: string; desc: string; group: string }[] = [
   { id: "source", label: "원본 오디오", desc: "처리할 오디오와 처리 구간", group: "준비" },
@@ -14,10 +15,10 @@ export const labelOf = (id: NodeId) => NODES.find((n) => n.id === id)!.label;
 
 export const go = (id: NodeId | "hub") => { location.hash = id === "hub" ? "#/" : `#/${id}`; };
 const subscribe = (cb: () => void) => { addEventListener("hashchange", cb); return () => removeEventListener("hashchange", cb); };
-const useRoute = (): NodeId | "hub" | "help" => {
+const useRoute = (): NodeId | "hub" | "help" | "how" => {
   const h = useSyncExternalStore(subscribe, () => location.hash);
   const id = h.replace(/^#\/?/, "");
-  return id === "help" ? "help" : NODES.some((n) => n.id === id) ? (id as NodeId) : "hub";
+  return id === "help" || id === "how" ? id : NODES.some((n) => n.id === id) ? (id as NodeId) : "hub";
 };
 
 export function StatusBadge({ status }: { status: Status }) {
@@ -28,7 +29,7 @@ export function StatusBadge({ status }: { status: Status }) {
 
 function NavList({ route, onNavigate }: { route: string; onNavigate?: () => void }) {
   const { s } = useApp();
-  const item = (id: NodeId | "hub" | "help", label: string, status?: Status) => (
+  const item = (id: NodeId | "hub" | "help" | "how", label: string, status?: Status) => (
     <a key={id} href={id === "hub" ? "#/" : `#/${id}`} aria-current={route === id ? "page" : undefined} onClick={onNavigate}>
       {label}{status && <StatusBadge status={status} />}
     </a>
@@ -37,6 +38,7 @@ function NavList({ route, onNavigate }: { route: string; onNavigate?: () => void
     <nav className="vk-nav" aria-label="주 메뉴">
       {item("hub", "작업 공간")}
       {item("help", "사용법")}
+      {item("how", "원리와 구조")}
       {["준비", "기능"].map((g) => (
         <div key={g} role="group" aria-labelledby={`g-${g === "기능" ? "task" : "res"}`} className="vk-nav">
           <h2 id={`g-${g === "기능" ? "task" : "res"}`}>{g}</h2>
@@ -59,7 +61,7 @@ function Shell() {
         <NavList route={route} />
       </aside>
       <header className="vk-topbar">
-        <span className="vk-where">{route === "hub" ? "작업 공간" : route === "help" ? "사용법" : labelOf(route)}</span>
+        <span className="vk-where">{route === "hub" ? "작업 공간" : route === "help" ? "사용법" : route === "how" ? "원리와 구조" : labelOf(route)}</span>
         <span className="vk-sum">{done}/{NODES.length} 완료</span>
         <Drawer
           isOpen={isMenuOpen} onOpenChange={setIsMenuOpen} title="메뉴"
@@ -69,7 +71,7 @@ function Shell() {
         </Drawer>
       </header>
       <main className="vk-main">
-        {route === "hub" ? <Hub /> : route === "help" ? <Help /> : route === "source" ? <SourcePanel /> : route === "reference" ? <ReferencePanel />
+        {route === "hub" ? <Hub /> : route === "help" ? <Help /> : route === "how" ? <How /> : route === "source" ? <SourcePanel /> : route === "reference" ? <ReferencePanel />
           : <AdjustPanel />}
       </main>
     </div>
