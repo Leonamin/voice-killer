@@ -54,7 +54,6 @@ export function How() {
     <section className="vk-panel" aria-labelledby="panel-title">
       <header>
         <h1 id="panel-title" className="vk-display">원리와 구조</h1>
-        <p>섞인 소리에서 한 사람의 목소리 크기만 바꾸는 방법입니다. 수식은 쓰지 않고 그림으로 설명합니다.</p>
       </header>
 
       <h2 className="vk-title">1. 구조</h2>
@@ -85,7 +84,7 @@ export function How() {
       </ol>
 
       <h2 className="vk-title">3. 직접 해 보기</h2>
-      <p className="vk-muted" style={{ margin: 0 }}>소리를 칸으로 그린 모형입니다. 슬라이더를 움직여 단계 5가 칸에 어떻게 닿는지 보세요. 실제 소리를 처리하는 화면은 “목소리 크기 조절”입니다.</p>
+      <p className="vk-muted" style={{ margin: 0 }}>실제 소리가 아니라 칸으로 그린 모형입니다.</p>
       <GridDemo />
 
       <h2 className="vk-title">4. 우리가 잰 것</h2>
@@ -103,9 +102,8 @@ export function How() {
         </table>
       </div>
       <ul className="vk-muted vk-notes">
-        <li>줄여도 0이 되지 않습니다. 최대로 줄여도 −25 dB가 한계입니다.</li>
         <li>키우면 대상 목소리와 함께 주변 소리도 조금 커집니다. 대상과 주변 소리를 완전히 가르지 못하기 때문으로 보이며 원인은 확인하지 않았습니다.</li>
-        <li>이 수치는 사람이 알아듣는 정도가 아닙니다. 소리 크기 변화만 잰 값입니다.</li>
+        <li>소리 크기 변화만 잰 값이고, 사람이 알아듣는 정도는 아닙니다.</li>
       </ul>
     </section>
   );
