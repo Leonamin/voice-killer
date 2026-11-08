@@ -17,3 +17,7 @@ okf_version: "0.1"
 - 배포: vk.leonamin.com을 hamsbox 터널로 통합(decisions/006-public-deployment.md 갱신)
 - 코드: 웹에서 실시간·변환 제거, 크기 조절 화면 통합(web/src), web.py strength [-4, 1]
 - 코드: 후보 찾기에 같은 사람 합치기 추가(web/src/Candidates.tsx), concepts/reference-candidate-discovery.md 갱신
+- 정리: 변환·실시간·추출 백엔드 삭제(stream.py, vc_worker.py, setup_vc.sh, requirements-vc-lock.txt, engine의 StreamSuppressor·convert, web.py의 /ws/stream·mode), README 갱신
+- 정리: 옛 전용 터널 voice-killer와 voice-killer-tunnel 서비스 삭제
+- 남김: `.venv-seedvc`, `vendor/seed-vc`는 디스크에 그대로 있다. 기록은 references/vc-spike.md에 남는다.
+

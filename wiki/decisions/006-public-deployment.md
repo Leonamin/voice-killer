@@ -31,4 +31,4 @@ HTTPS가 Cloudflare에서 처리되어 자체 서명 인증서 없이 마이크�
 
 ## 2026-11-08 갱신: 기존 터널로 통합
 
-전용 터널 `voice-killer`(서비스 `voice-killer-tunnel`은 꺼져 있었고 `vk.leonamin.com`이 오류 1033을 반환했다)를 쓰지 않고, 기존 `hamsbox` 터널(ID `69223a2b-81c8-447c-a8da-83d781df6e29`)에 `vk.leonamin.com → http://127.0.0.1:8000`을 추가했다. DNS CNAME도 hamsbox로 바꿨다. 외부 주소가 200을 반환했다. 위 결정 1·3항의 전용 터널·서비스는 더 쓰지 않는다. 전용 터널 삭제와 서비스 파일 정리는 아직 하지 않았다.
+전용 터널 `voice-killer`(서비스 `voice-killer-tunnel`은 꺼져 있었고 `vk.leonamin.com`이 오류 1033을 반환했다)를 쓰지 않고, 기존 `hamsbox` 터널(ID `69223a2b-81c8-447c-a8da-83d781df6e29`)에 `vk.leonamin.com → http://127.0.0.1:8000`을 추가했다. DNS CNAME도 hamsbox로 바꿨다. 외부 주소가 200을 반환했다. 위 결정 1·3항의 전용 터널·서비스는 더 쓰지 않는다. 전용 터널 `voice-killer`는 삭제했고 `voice-killer-tunnel` 서비스와 `~/.cloudflared/voice-killer.yml`도 지웠다. 삭제 뒤에도 `vk.leonamin.com`은 200을 반환했다.
