@@ -74,8 +74,8 @@ def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float 
             ref_start: float = Form(0.0), ref_end: float = Form(...), mode: str = Form("remove"), strength: float = Form(1.0), steps: int = Form(10)):
     if mode not in ("extract", "remove", "convert"):
         raise HTTPException(400, "mode는 extract, remove, convert 중 하나여야 합니다")
-    if not 0 <= strength <= 1:  # also rejects NaN
-        raise HTTPException(400, "strength는 0~1이어야 합니다")
+    if not -4 <= strength <= 1:  # also rejects NaN; negative = boost
+        raise HTTPException(400, "strength는 -4~1이어야 합니다")
     if mode == "convert" and steps not in (4, 10):
         raise HTTPException(400, "steps는 4 또는 10이어야 합니다")
     x = decode(audio)

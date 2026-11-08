@@ -22,6 +22,15 @@ def test_mask_suppresses_target_without_muting_overlap():
     assert audience_gain > .98
 
 
+def test_negative_strength_boosts_target_only():
+    t = np.arange(32000) / 16000
+    target = .25 * np.sin(2 * np.pi * 312.5 * t)
+    audience = .1 * np.sin(2 * np.pi * 2250 * t)
+    output = suppress(target + audience, target, method="mask", mask_power=2, strength=-1)
+    assert 1.9 < np.dot(output, target) / np.dot(target, target) < 2.1
+    assert .98 < np.dot(output, audience) / np.dot(audience, audience) < 1.02
+
+
 def test_zero_strength_is_identity():
     x = np.random.default_rng(0).normal(size=128).astype(np.float32)
     np.testing.assert_array_equal(suppress(x, x, strength=0), x)
@@ -42,7 +51,7 @@ def test_resampling_and_silence_are_finite():
 
 
 def test_invalid_shape_and_parameters_rejected():
-    for kwargs in [{"strength": 1.1}, {"strength": float("nan")}, {"mask_power": 0}]:
+    for kwargs in [{"strength": 1.1}, {"strength": -4.1},{"strength": float("nan")}, {"mask_power": 0}]:
         with pytest.raises(ValueError):
             suppress(np.zeros(512), np.zeros(512), **kwargs)
     with pytest.raises(ValueError):

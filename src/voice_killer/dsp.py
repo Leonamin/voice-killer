@@ -13,8 +13,9 @@ def resample(audio, source_rate, target_rate):
 
 def suppress(mixture, target, strength=1.0, method="mask", mask_power=4.0, hard_threshold=0.65):
     """Mono 16 kHz mixture and aligned, unnormalized target estimate."""
-    if not 0 <= strength <= 1 or not np.isfinite(strength):
-        raise ValueError("strength must be in [0, 1]")
+    # Negative strength boosts the target: output = X * (1 + |strength| * mask).
+    if not -4 <= strength <= 1 or not np.isfinite(strength):
+        raise ValueError("strength must be in [-4, 1]")
     if mask_power <= 0 or not np.isfinite(mask_power):
         raise ValueError("mask_power must be positive and finite")
     if not 0 < hard_threshold <= 1 or not np.isfinite(hard_threshold):

@@ -16,6 +16,11 @@ def test_end_out_of_range_is_400(tmp_path):
     assert r.status_code == 400 and "처리" in r.json()["detail"]
 
 
+def test_strength_range_allows_boost_only_down_to_minus_four(tmp_path):
+    assert post(tmp_path, end=2, mode="remove", strength=-4.5).status_code == 400
+    assert post(tmp_path, end=2, mode="remove", strength=1.5).status_code == 400
+
+
 def test_convert_bad_steps_is_400(tmp_path):
     r = post(tmp_path, end=2, mode="convert", steps=7)
     assert r.status_code == 400 and "steps" in r.json()["detail"]
