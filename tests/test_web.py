@@ -21,17 +21,6 @@ def test_strength_range_allows_boost_only_down_to_minus_four(tmp_path):
     assert post(tmp_path, end=2, mode="remove", strength=1.5).status_code == 400
 
 
-def test_convert_bad_steps_is_400(tmp_path):
-    r = post(tmp_path, end=2, mode="convert", steps=7)
-    assert r.status_code == 400 and "steps" in r.json()["detail"]
-
-
-def test_ws_invalid_enroll_seconds_sends_error():
-    with TestClient(web.app).websocket_connect("/ws/stream") as ws:
-        ws.send_text('{"enroll_seconds": 0}')
-        assert "error" in ws.receive_json()
-
-
 def test_candidates_range_is_400(tmp_path, monkeypatch):
     monkeypatch.setattr(web.candidates, "available", lambda: True)
     p = tmp_path / "a.wav"

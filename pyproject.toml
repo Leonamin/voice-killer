@@ -16,7 +16,6 @@ research = ["faster-whisper==1.2.1", "gdown", "yt-dlp", "pytest"]
 
 [project.scripts]
 voice-killer = "voice_killer.cli:main"
-voice-killer-stream = "voice_killer.stream:main"
 voice-killer-web = "voice_killer.web:main"
 
 [tool.setuptools.packages.find]

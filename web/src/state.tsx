@@ -97,7 +97,7 @@ async function request(s: State, task: Task, p: Params): Promise<Result> {
   fd.append("start", String(src.range.start)); fd.append("end", String(src.range.end));
   if (s.reference.mode === "file") fd.append("ref", rb, "ref");
   fd.append("ref_start", String(rr.start)); fd.append("ref_end", String(rr.end));
-  fd.append("mode", task); fd.append("strength", String(p.strength));
+  fd.append("strength", String(p.strength));
   const r = await fetch("/api/process", { method: "POST", body: fd });
   if (!r.ok) {
     let m = r.statusText;

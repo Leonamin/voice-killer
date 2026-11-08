@@ -1,6 +1,6 @@
 #!/bin/sh
 # /opt/voice-killer/releases/<UTC>에 소스 스냅샷을 만들고 current 링크를 바꾼 뒤 서비스를 재시작한다.
-# venv는 절대 경로에 묶여 있어 복사하지 않고, 무거운 환경(.venv-seedvc, models, vendor)은 원본 저장소를 링크한다.
+# venv는 절대 경로에 묶여 있어 복사하지 않고, 무거운 환경(models, vendor)은 원본 저장소를 링크한다.
 set -eu
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -24,7 +24,7 @@ tar \
   --exclude='models' --exclude='vendor' --exclude='data' --exclude='outputs' \
   --exclude='experiments' --exclude='.cache' --exclude='__pycache__' --exclude='*.egg-info' \
   -C "$project_dir" -cf - . | tar -C "$release_dir" -xf -
-for shared in .venv-seedvc models vendor; do
+for shared in models vendor; do
   ln -sfn "$project_dir/$shared" "$release_dir/$shared"
 done
 chown -R "$run_user" "$release_dir"

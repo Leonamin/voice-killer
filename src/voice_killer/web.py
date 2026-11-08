@@ -1,15 +1,13 @@
-"""Local web demo: POST /api/process crops, extracts or removes a speaker."""
+"""Local web demo: POST /api/process crops and adjusts one speaker's level; POST /api/candidates finds reference spans."""
 import argparse
 import contextlib
-import asyncio
 import io
-import json
 import subprocess
 import tempfile
 import threading
 import numpy as np
 import soundfile as sf
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from . import candidates, engine
@@ -71,32 +69,18 @@ def crop(x, start, end, name, max_seconds=None):
 
 @app.post("/api/process")
 def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float = Form(...), ref: UploadFile | None = File(None),
-            ref_start: float = Form(0.0), ref_end: float = Form(...), mode: str = Form("remove"), strength: float = Form(1.0), steps: int = Form(10)):
-    if mode not in ("extract", "remove", "convert"):
-        raise HTTPException(400, "mode는 extract, remove, convert 중 하나여야 합니다")
+            ref_start: float = Form(0.0), ref_end: float = Form(...), strength: float = Form(1.0)):
     if not -4 <= strength <= 1:  # also rejects NaN; negative = boost
         raise HTTPException(400, "strength는 -4~1이어야 합니다")
-    if mode == "convert" and steps not in (4, 10):
-        raise HTTPException(400, "steps는 4 또는 10이어야 합니다")
     x = decode(audio)
     mix = crop(x, start, end, "처리", MAX_SECONDS)
-    if mode == "convert" and len(mix) > engine.MAX_VC_SOURCE * SR:
-        raise HTTPException(400, f"변환할 구간은 최대 {engine.MAX_VC_SOURCE}초입니다")
     enroll = crop(decode(ref) if ref and ref.filename else x, ref_start, ref_end, "기준 목소리")
     try:
         engine.check_enrollment(enroll)
     except ValueError as e:
         raise HTTPException(400, f"기준 목소리 구간: {e}")
-    if mode == "convert" and len(enroll) > engine.MAX_VC_REFERENCE * SR:
-        raise HTTPException(400, f"기준 목소리 구간은 최대 {engine.MAX_VC_REFERENCE}초입니다")
     with lock:
-        if mode == "convert":
-            try:
-                out = engine.convert(mix, enroll, steps)
-            except RuntimeError as e:
-                raise HTTPException(503, str(e))
-        else:
-            out = engine.extract(mix, enroll) if mode == "extract" else engine.remove(mix, enroll, strength)
+        out = engine.remove(mix, enroll, strength)
     buf = io.BytesIO()
     sf.write(buf, out.astype(np.float32), SR, format="WAV", subtype="FLOAT")
     return Response(buf.getvalue(), media_type="audio/wav")
@@ -111,53 +95,6 @@ def find_candidates(audio: UploadFile = File(...), start: float = Form(0.0), end
     x = crop(decode(audio), start, end, "탐색", MAX_SECONDS)
     with lock:
         return candidates.find(x, offset=start, num_speakers=num_speakers)
-
-
-MAX_BLOCK = 4 * SR
-
-
-def pcm(data, max_n, name):
-    if len(data) % 4 or not data:
-        raise ValueError(f"{name} 길이가 올바르지 않습니다")
-    x = np.frombuffer(data, dtype="<f4").astype(np.float32)
-    if len(x) > max_n or not np.isfinite(x).all():
-        raise ValueError(f"{name}이(가) 너무 길거나 유효하지 않은 값이 있습니다")
-    return x
-
-
-def infer(sup, block):
-    with lock:  # shared with /api/process
-        return sup.push(block)
-
-
-@app.websocket("/ws/stream")
-async def stream(ws: WebSocket):
-    await ws.accept()
-    try:
-        try:
-            n = json.loads(await ws.receive_text())["enroll_seconds"]
-            if isinstance(n, bool) or not isinstance(n, (int, float)) or not np.isfinite(n) or not 1 <= n <= 30:
-                raise ValueError("enroll_seconds는 1~30이어야 합니다")
-            enroll = pcm(await ws.receive_bytes(), 30 * SR, "등록 음성")
-            if abs(len(enroll) - n * SR) > SR / 10:
-                raise ValueError("등록 음성 길이가 enroll_seconds와 맞지 않습니다")
-            engine.check_enrollment(enroll)
-            sup = await asyncio.to_thread(lambda: engine.StreamSuppressor(enroll, engine.load_extractor()))
-        except (ValueError, KeyError, TypeError) as e:  # json errors are ValueError
-            await ws.send_text(json.dumps({"error": f"잘못된 요청: {e}"}, ensure_ascii=False))
-            await ws.close()
-            return
-        await ws.send_text('{"ready": true}')
-        while True:
-            try:
-                block = pcm(await ws.receive_bytes(), MAX_BLOCK, "블록")
-            except (ValueError, KeyError) as e:  # KeyError: text frame instead of binary
-                await ws.send_text(json.dumps({"error": f"잘못된 블록: {e}"}, ensure_ascii=False))
-                await ws.close()
-                return
-            await ws.send_bytes((await asyncio.to_thread(infer, sup, block)).astype("<f4").tobytes())
-    except (WebSocketDisconnect, RuntimeError):  # RuntimeError: receive after the client already closed
-        pass  # ponytail: a block mid-inference at disconnect still finishes before the lock frees
 
 
 def main():
