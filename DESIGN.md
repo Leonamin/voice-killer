@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: Voice Killer
-description: 특정 화자 추출·제거·음성 변환·실시간 제거 웹 데모의 다크 네온 디자인 시스템
+description: 특정 화자의 목소리 크기를 줄이거나 키우는 웹 데모의 다크 네온 디자인 시스템
 colors:
   bg: "#0B0D10"
   surface: "#14171C"
@@ -22,6 +22,8 @@ colors:
   danger-soft: "#3D1620"
   warning: "#FFC53D"
   warning-soft: "#3A2E10"
+  reduce: "#4F8CFF"
+  boost: "{colors.primary}"
 typography:
   display:
     fontFamily: Pretendard Variable
@@ -164,7 +166,7 @@ components:
 
 ## Overview
 
-수업 시연용 오디오 실험 도구다. 어두운 작업 화면 위에 네온 주황과 네온 초록 두 색만 강하게 쓴다. 색은 장식이 아니라 의미를 전달한다. 주황은 "지우고 바꾸는 처리"와 처리 구간, 초록은 "참조·실시간·완료"를 뜻한다.
+수업 시연용 오디오 실험 도구다. 어두운 작업 화면 위에 네온 주황과 네온 초록 두 색만 강하게 쓴다. 색은 장식이 아니라 의미를 전달한다. 주황은 "크기를 바꾸는 처리"와 처리 구간, 초록은 "참조·완료"를 뜻한다.
 
 사용자가 정한 결정: Pretendard 글꼴, 네온 주황·초록 메인 컬러, 단계별 CTA와 Star형 IA, Goodcase UI 컴포넌트 사용. 테마는 다크 단일이다. 네온은 밝은 배경에서 대비와 정체성을 잃기 때문이다.
 
@@ -173,11 +175,13 @@ components:
 `primary`는 네온 주황, `live`는 네온 초록이다.
 
 - `{colors.primary}`: 기본 CTA(`{components.button-primary}`), 현재 단계, 처리 구간 파형 영역.
-- `{colors.live}`: 참조 구간 파형 영역, 실시간 시작(`{components.button-live}`), 완료 상태(`{components.badge-done}`), 포커스 링.
+- `{colors.live}`: 참조 구간 파형 영역, 완료 상태(`{components.badge-done}`), 포커스 링.
+- `{colors.reduce}`: 크기 조절 슬라이더에서 줄이는 쪽(가운데에서 왼쪽)의 채움색과 손잡이. 파란 계열이라 주황과 구분된다.
+- `{colors.boost}`: 같은 슬라이더에서 키우는 쪽. 별도 색을 만들지 않고 `{colors.primary}`를 가리킨다.
 - `{colors.danger}`: 오류만. 주황과 혼동되지 않도록 분홍빛 빨강을 쓴다.
 - `{colors.warning}`: 합성 음성 표시(`{components.badge-synthetic}`)와 주의 안내.
 - 네온 색을 글자색으로 쓸 때는 `{colors.bg}`·`{colors.surface}` 위에서만 쓴다. 네온 배경 위 글자는 항상 `{colors.on-accent}`다.
-- 은은한 발광(glow)은 기본 CTA와 실시간 실행 중 표시에만 쓴다. 발광 색은 각 강조색의 약 35% 불투명도다.
+- 은은한 발광(glow)은 기본 CTA에만 쓴다. 발광 색은 각 강조색의 약 35% 불투명도다.
 
 ## Typography
 
@@ -187,17 +191,14 @@ Pretendard Variable을 npm `pretendard` 패키지로 번들한다. 시연장의 
 
 ### 정보 구조: Star형
 
-중심(허브)은 **작업 공간**이다. 공통 자원 두 가지와 작업 네 가지가 허브를 둘러싼다.
+중심(허브)은 **작업 공간**이다. 공통 자원 두 가지와 작업 하나가 허브를 둘러싼다.
 
 ```text
                  ┌─ 소스: 처리할 오디오와 처리 구간
    공통 자원 ────┤
                  └─ 참조: 대상 목소리 구간 (같은 파일 또는 다른 파일)
 작업 공간(허브)
-                 ┌─ 추출   (필요: 소스, 참조)
-   작업 ─────────┼─ 제거   (필요: 소스, 참조)
-                 ├─ 변환   (필요: 소스=바꿀 목소리, 참조=닮을 목소리)
-                 └─ 실시간 (필요: 참조 또는 마이크 등록)
+   작업 ─────────── 크기 조절 (필요: 소스, 참조)
 ```
 
 - 한 번에 패널 하나만 보인다. 세로로 모든 기능을 나열하지 않는다.
@@ -229,13 +230,12 @@ Goodcase UI(`~/.agents/skills/use-goodcase-ui`, manifest 0.1.0)의 React 컴포�
 | 화면 요소 | Goodcase 컴포넌트 | 이 문서의 토큰 |
 | --- | --- | --- |
 | 기본 CTA, 실행 | Button (pending으로 중복 실행 차단) | `{components.button-primary}` |
-| 실시간 시작 | Button | `{components.button-live}` |
-| 노드 상태, 합성 음성 표시 | Badge | `{components.badge-done}`, `{components.badge-synthetic}` |
+| 노드 상태 | Badge | `{components.badge-done}` |
 | 허브 노드 카드 | Card | `{components.panel}` |
 | 오류와 재시도 | Alert | `{components.alert-error}` |
-| 변환·처리 진행 | Progress (불확정) | `{colors.primary}` |
-| 등록 방식, 입력 방식 | RadioGroup | |
-| step 수, 블록 크기 | Select | |
+| 처리 진행 | Progress (불확정) | `{colors.primary}` |
+| 기준 목소리 위치 | RadioGroup | |
+| 줄이기·키우기 크기 | Slider | `{colors.reduce}`, `{colors.boost}` |
 | 원본 듣기 | Switch | |
 | 모바일 내비게이션 | Drawer | |
 | 완료 알림 | Toast | |
@@ -249,7 +249,7 @@ Goodcase UI(`~/.agents/skills/use-goodcase-ui`, manifest 0.1.0)의 React 컴포�
 - Do: 한 패널에 기본 CTA는 하나만 둔다.
 - Do: 상태는 색과 텍스트를 함께 쓴다 ("완료" 글자 + 초록).
 - Do: 합성 음성 결과에는 항상 `{components.badge-synthetic}`를 붙인다.
-- Don't: 주황과 초록을 의미 없이 섞지 않는다. 처리 = 주황, 참조·실시간·완료 = 초록.
+- Don't: 주황과 초록을 의미 없이 섞지 않는다. 처리 = 주황, 참조·완료 = 초록. 크기 조절 슬라이더만 줄이기 = 파랑, 키우기 = 주황이다.
 - Don't: 오류에 주황을 쓰지 않는다.
 - Don't: 선행 조건이 없다고 내비게이션 항목을 비활성화하지 않는다.
 

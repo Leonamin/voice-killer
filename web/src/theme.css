@@ -19,6 +19,8 @@
   --vk-danger-soft: #3d1620;
   --vk-warning: #ffc53d;
   --vk-warning-soft: #3a2e10;
+  --vk-reduce: #4f8cff;
+  --vk-boost: var(--vk-primary);
 
   --vk-font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --vk-display-size: 32px;
