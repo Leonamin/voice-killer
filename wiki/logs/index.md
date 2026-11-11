@@ -8,6 +8,7 @@ scope: "logs"
 
 # Wiki Logs
 
+- [2026-11-11: 페이지 전체 드래그드롭과 음량 숫자 고정](2026-11-11-page-drop-and-volume-layout.md)
 - [2026-11-08: 2조 주제발표 요구 기록](2026-11-08-team2-topic-presentation.md)
 - [2026-10-21: 기준 오디오 후보 자동 탐색 구상](2026-10-21-reference-candidate-discovery.md)
 - [2026-10-21: 오디오 플레이어 UI 개선](2026-10-21-player-ui.md)

@@ -41,6 +41,46 @@ function FilePick({ label, onFile }: { label: string; onFile: (f: File) => void 
   );
 }
 
+/** The whole window accepts a dropped file while `onFile` is set. Returns true while a file is held over the window. */
+function usePageDrop(onFile: ((f: File) => void) | null) {
+  const [isOver, setIsOver] = useState(false);
+  const cb = useRef(onFile);
+  cb.current = onFile;
+  const isOn = onFile !== null;
+  useEffect(() => {
+    if (!isOn) return;
+    let depth = 0; // dragenter/dragleave also fire for every child element
+    const hasFiles = (e: DragEvent) => !!e.dataTransfer?.types.includes("Files");
+    const enter = (e: DragEvent) => { if (hasFiles(e)) { depth++; setIsOver(true); } };
+    const over = (e: DragEvent) => { if (hasFiles(e)) e.preventDefault(); };
+    const leave = (e: DragEvent) => { if (hasFiles(e) && --depth <= 0) { depth = 0; setIsOver(false); } };
+    const drop = (e: DragEvent) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault(); depth = 0; setIsOver(false);
+      const f = e.dataTransfer?.files[0];
+      if (f) cb.current?.(f);
+    };
+    window.addEventListener("dragenter", enter); window.addEventListener("dragover", over);
+    window.addEventListener("dragleave", leave); window.addEventListener("drop", drop);
+    return () => {
+      window.removeEventListener("dragenter", enter); window.removeEventListener("dragover", over);
+      window.removeEventListener("dragleave", leave); window.removeEventListener("drop", drop);
+      setIsOver(false);
+    };
+  }, [isOn]);
+  return isOver;
+}
+
+function DropZone({ label, isOver, hasFile }: { label: string; isOver: boolean; hasFile: boolean }) {
+  return (
+    <>
+      {hasFile ? <p className="vk-muted" style={{ margin: 0 }}>{FORMATS}</p>
+        : <div className="vk-drop" data-over={isOver}><b>파일을 끌어다 놓기</b><span className="vk-muted">{FORMATS}</span></div>}
+      {isOver && <div className="vk-drop-all" aria-hidden="true">{label}</div>}
+    </>
+  );
+}
+
 export function Hub() {
   const { s } = useApp();
   const next: [string, NodeId] = statusOf(s, "source") !== "완료" ? ["다음: 원본 오디오 불러오기", "source"]
@@ -64,6 +104,8 @@ export function SourcePanel() {
   const [isRecording, setIsRecording] = useState(false);
   const rec = useRef<MediaRecorder | null>(null);
   useEffect(() => () => { rec.current?.stop(); }, []);
+  const load = (f: File) => { setError(""); dispatch({ type: "source", blob: f, name: f.name }); };
+  const isOver = usePageDrop(load);
 
   async function toggleRec() {
     if (rec.current) { rec.current.stop(); return; }
@@ -85,12 +127,12 @@ export function SourcePanel() {
     <Panel title="원본 오디오"
       cta={<Button onClick={() => go("reference")}>다음: 기준 목소리 지정</Button>}>
       <div className="vk-row">
-        <FilePick label="파일 올리기" onFile={(f) => { setError(""); dispatch({ type: "source", blob: f, name: f.name }); }} />
+        <FilePick label="파일 올리기" onFile={load} />
         <Button variant="secondary" onClick={toggleRec}>{isRecording ? "녹음 중지" : "녹음 시작"}</Button>
         {src && <span className="vk-muted">{src.name}</span>}
       </div>
-      <p className="vk-muted" style={{ margin: 0 }}>{FORMATS}</p>
-      {error && <Alert tone="danger" title="오류">{error}</Alert>}
+      <DropZone label="원본 오디오로 올리기" isOver={isOver} hasFile={!!src} />
+      {error &&<Alert tone="danger" title="오류">{error}</Alert>}
       {src ? (
         <>
           <Waveform blob={src.blob} range={src.range} initial={(d) => ({ start: 0, end: d })} kind="process" label="처리 구간" note={`처리 구간 ${fmt(src.range)}`}
@@ -106,6 +148,8 @@ export function ReferencePanel() {
   const { mode, file } = s.reference, blob = refBlobOf(s), range = refRangeOf(s);
   const r = range && range.end - range.start;
   const [pick, setPick] = useState(0); // Waveform reads its region only at creation: a picked candidate remounts it
+  const loadRef = (f: File) => dispatch({ type: "refFile", blob: f, name: f.name });
+  const isOver = usePageDrop(mode === "file" ? loadRef : null);
   return (
     <Panel title="기준 목소리" purpose="대상 목소리가 혼자 말하는 5~10초 구간을 지정합니다."
       cta={<Button onClick={() => go("hub")}>다음: 작업 선택</Button>}>
@@ -113,8 +157,8 @@ export function ReferencePanel() {
         options={[{ value: "same", label: "원본 오디오와 같은 파일" }, { value: "file", label: "다른 파일" }]} />
       {mode === "file" && (
         <>
-          <div className="vk-row"><FilePick label="기준 목소리 파일 올리기" onFile={(f) => dispatch({ type: "refFile", blob: f, name: f.name })} />{file && <span className="vk-muted">{file.name}</span>}</div>
-          <p className="vk-muted" style={{ margin: 0 }}>{FORMATS}</p>
+          <div className="vk-row"><FilePick label="기준 목소리 파일 올리기" onFile={loadRef} />{file && <span className="vk-muted">{file.name}</span>}</div>
+          <DropZone label="기준 목소리 파일로 올리기" isOver={isOver} hasFile={!!file} />
         </>
       )}
       {mode === "same" && !s.source && <Missing items={["source"]} />}

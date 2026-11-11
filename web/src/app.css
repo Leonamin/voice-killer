@@ -85,6 +85,13 @@ a.gc-button { text-decoration: none; }
 .vk-play { min-width: 8.5em; }
 .vk-clock { font-variant-numeric: tabular-nums; font-family: var(--vk-font-mono, ui-monospace, monospace); min-width: 15ch; }
 .vk-volume input[type=range] { width: 100%; max-width: 320px; accent-color: var(--vk-primary); }
+/* fixed-width number: "5%" -> "100%" must not move the slider */
+.vk-volume output { display: inline-block; min-width: 5ch; text-align: right; }
+
+/* 드롭: 패널 안의 큰 영역과, 끌고 있는 동안 화면 전체를 덮는 표시 */
+.vk-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--vk-space-sm); min-height: 180px; padding: var(--vk-space-lg); border: 2px dashed var(--vk-border); border-radius: var(--vk-rounded-lg); text-align: center; }
+.vk-drop[data-over="true"] { border-color: var(--vk-primary); background: var(--vk-primary-soft); }
+.vk-drop-all { position: fixed; inset: var(--vk-space-md); z-index: 1000; display: grid; place-items: center; border: 3px dashed var(--vk-primary); border-radius: var(--vk-rounded-lg); background: color-mix(in srgb, var(--vk-bg) 80%, transparent); font-size: var(--vk-title-size); font-weight: var(--vk-title-weight); pointer-events: none; }
 
 /* Centre-origin slider: colour the track from the middle to the thumb, not from the left edge. */
 .vk-centered .gc-slider-input {
