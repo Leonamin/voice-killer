@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { QueueNote } from "./Queue";
 import { Alert, Button, Card, Progress, RadioGroup, Slider } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
 import { refBlobOf, refRangeOf, statusOf, ADJUST_LABEL, useApp, type NodeId, type Range, type Result } from "./state";
@@ -228,7 +229,7 @@ export function AdjustPanel() {
       <Slider label="마스크 날카로움 (p)" min={1} max={8} step={1} value={p} onValueChange={setP} valueText={String(p)}
         description="클수록 대상과 주변 소리를 더 날카롭게 가릅니다. 기본 4." />
       {!shouldKeepTarget && u > 0 &&<p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
-      {isRunning && <Progress label="처리 중" size="thin" />}
+      {isRunning && <><Progress label="처리 중" size="thin" /><QueueNote /></>}
       {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={isRunning || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}
       {res && <ResultBlock key={res.createdAt} res={res} />}
       {res && <div><Button variant="secondary" isLoading={isRunning} disabled={missing.length > 0} onClick={exec}>다시 실행</Button></div>}

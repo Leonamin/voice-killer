@@ -37,3 +37,11 @@ def test_candidates_bad_speaker_count_is_400(tmp_path, monkeypatch):
     with p.open("rb") as f:
         r = TestClient(web.app).post("/api/candidates", files={"audio": ("a.wav", f)}, data={"start": 0, "end": 1, "num_speakers": 99})
     assert r.status_code == 400 and "화자 수" in r.json()["detail"]
+
+
+def test_queue_counts_requests_holding_or_waiting_for_the_lock():
+    client = TestClient(web.app)
+    assert client.get("/api/queue").json() == {"pending": 0}
+    with web.slot():
+        assert client.get("/api/queue").json() == {"pending": 1}
+    assert client.get("/api/queue").json() == {"pending": 0}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { QueueNote } from "./Queue";
 import { Alert, Button, Select } from "./ui/components";
 import type { Range } from "./state";
 
@@ -88,6 +89,7 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
       <Select label="화자 수" value={count} onValueChange={setCount}
         options={[{ value: "0", label: "자동" }, ...[1, 2, 3, 4, 5, 6].map((n) => ({ value: String(n), label: `${n}명` }))]} />
       <div className="vk-row"><Button variant="secondary" isLoading={isLoading} onClick={search}>{found ? "다시 찾기" : "후보 찾기"}</Button></div>
+      {isLoading && <QueueNote />}
       {error && <Alert tone="danger" title="후보를 찾지 못했습니다">{error}</Alert>}
       {found && found.speakers.length > 0 && <p style={{ margin: 0 }}><strong>목소리 {found.speakers.length}명</strong>을 찾았습니다. 목소리마다 혼자 말한 구간이 후보로 묶여 있습니다.</p>}
       {found && found.speakers.length === 0 && <Alert tone="warning" title="후보 없음">한 사람만 말하는 구간(2초 이상)을 찾지 못했습니다. 아래에서 직접 지정하세요.</Alert>}

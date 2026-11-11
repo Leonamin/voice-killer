@@ -15,7 +15,22 @@ from . import candidates, engine
 SR = 16000
 MAX_BYTES = 200 * 1024 * 1024  # ponytail: the 10-min stereo 48 kHz demo wav is 119 MB; whole upload sits in RAM
 MAX_SECONDS = 600
-lock = threading.Lock()  # ponytail: global lock, one request at a time; a queue if several users matter
+lock = threading.Lock()  # ponytail: global lock, one request at a time; waiters get no order guarantee or ticket
+count_lock, pending = threading.Lock(), 0  # requests running or waiting for `lock`
+
+
+@contextlib.contextmanager
+def slot():
+    """Hold the model lock; `pending` counts this request from the moment it starts waiting."""
+    global pending
+    with count_lock:
+        pending += 1
+    try:
+        with lock:
+            yield
+    finally:
+        with count_lock:
+            pending -= 1
 
 
 @contextlib.asynccontextmanager
@@ -67,6 +82,11 @@ def crop(x, start, end, name, max_seconds=None):
     return x[round(start * SR):round(end * SR)]
 
 
+@app.get("/api/queue")
+def queue():
+    return {"pending": pending}
+
+
 @app.post("/api/process")
 def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float = Form(...), ref: UploadFile | None = File(None),
             ref_start: float = Form(0.0), ref_end: float = Form(...), strength: float = Form(1.0),
@@ -84,7 +104,7 @@ def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float 
         engine.check_enrollment(enroll)
     except ValueError as e:
         raise HTTPException(400, f"기준 목소리 구간: {e}")
-    with lock:
+    with slot():
         out = engine.remove(mix, enroll, strength, mask_power=mask_power, should_keep_target=keep)
     buf = io.BytesIO()
     sf.write(buf, out.astype(np.float32), SR, format="WAV", subtype="FLOAT")
@@ -98,7 +118,7 @@ def find_candidates(audio: UploadFile = File(...), start: float = Form(0.0), end
     if not candidates.available():
         raise HTTPException(503, "후보 탐색 모델이 없습니다. scripts/setup_diarize.sh 를 실행하세요")
     x = crop(decode(audio), start, end, "탐색", MAX_SECONDS)
-    with lock:
+    with slot():
         return candidates.find(x, offset=start, num_speakers=num_speakers)
 
 
