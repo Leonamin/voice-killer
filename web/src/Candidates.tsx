@@ -68,7 +68,7 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
           <h3 className="vk-voice-name">목소리 {sp.id}</h3>
           <span className="vk-muted">후보 {sp.candidates.length}개 · 혼자 말한 구간 합계 {sp.total.toFixed(0)}초{sp.from && sp.from.length > 1 ? ` · 합침: ${sp.from.join("+")}` : ""}</span>
         </div>
-        <label className="vk-check"><span className="vk-check-box"><input className="gc-checkbox-input" type="checkbox" checked={sel.includes(sp.id)} onChange={(e) => setSel((a) => (e.target.checked ? [...a, sp.id] : a.filter((i) => i !== sp.id)))} /></span>합치기용 선택</label>
+        {speakers.length > 1 && <label className="vk-check"><span className="vk-check-box"><input className="gc-checkbox-input" type="checkbox" checked={sel.includes(sp.id)} onChange={(e) => setSel((a) => (e.target.checked ? [...a, sp.id] : a.filter((i) => i !== sp.id)))} /></span>합치기용 선택</label>}
       </header>
       <ul className="vk-voice-spans">
         {sp.candidates.map((c) => (
@@ -91,7 +91,7 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
       <div className="vk-row"><Button variant="secondary" isLoading={isLoading} onClick={search}>{found ? "다시 찾기" : "후보 찾기"}</Button></div>
       {isLoading && <QueueNote />}
       {error && <Alert tone="danger" title="후보를 찾지 못했습니다">{error}</Alert>}
-      {found && found.speakers.length > 0 && <p style={{ margin: 0 }}><strong>목소리 {found.speakers.length}명</strong>을 찾았습니다. 목소리마다 혼자 말한 구간이 후보로 묶여 있습니다.</p>}
+      {found && found.speakers.length > 0 && <p style={{ margin: 0 }}><strong>목소리 {speakers.length}명</strong>을 찾았습니다. 목소리마다 혼자 말한 구간이 후보로 묶여 있습니다.</p>}
       {found && found.speakers.length === 0 && <Alert tone="warning" title="후보 없음">한 사람만 말하는 구간(2초 이상)을 찾지 못했습니다. 아래에서 직접 지정하세요.</Alert>}
       {sel.length > 1 && <div className="vk-row"><Button variant="secondary" onClick={merge}>선택한 {sel.length}개를 같은 사람으로 합치기</Button></div>}
       {speakers.filter((sp) => !sp.is_minor).map(speaker)}
@@ -101,7 +101,7 @@ export function Candidates({ blob, range, onPick }: { blob: Blob; range: Range; 
           {speakers.filter((sp) => sp.is_minor).map(speaker)}
         </details>
       )}
-      {found && found.speakers.length > 0 && <p className="vk-muted" style={{ margin: 0 }}>자동 분류라 같은 사람이 둘로 나뉘거나 다른 사람이 섞일 수 있습니다. 같은 사람이 나뉘었으면 각 목소리의 "합치기용 선택"을 체크하고 "합치기"를 누르세요.</p>}
+      {speakers.length > 0 && <p className="vk-muted" style={{ margin: 0 }}>자동 분류라 같은 사람이 둘로 나뉘거나 다른 사람이 섞일 수 있습니다.{speakers.length > 1 && ' 같은 사람이 나뉘었으면 각 목소리의 "합치기용 선택"을 체크하고 "합치기"를 누르세요.'}</p>}
       <audio ref={audio} hidden onTimeUpdate={() => { const a = audio.current!; if (playing && a.currentTime >= stopAt.current) { a.pause(); setPlaying(null); } }} onEnded={() => setPlaying(null)} />
     </section>
   );
