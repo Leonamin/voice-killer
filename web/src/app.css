@@ -156,3 +156,6 @@ a.gc-button { text-decoration: none; }
 .vk-curve-cut { stroke: var(--vk-text-muted); stroke-width: 1; stroke-dasharray: 2 3; }
 .vk-curve-axis { stroke: var(--vk-control-border); stroke-width: 1; }
 .vk-spectro { width: 100%; height: auto; aspect-ratio: 5 / 2; image-rendering: pixelated; background: var(--vk-bg); border: 1px solid var(--vk-border); border-radius: var(--vk-rounded-md); display: block; }
+.vk-terms { margin: 0; display: grid; gap: var(--vk-space-md); }
+.vk-terms dt { font-weight: 600; }
+.vk-terms dd { margin: 2px 0 0; color: var(--vk-text-muted); }

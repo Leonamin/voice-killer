@@ -147,6 +147,23 @@ function Principle() {
   );
 }
 
+const TERMS: [string, string][] = [
+  ["REAL-TSE", "기준 목소리 샘플과 섞인 소리를 받아, 섞인 소리 안의 대상 목소리만 따로 뽑아 내는 AI 모델입니다. TSE는 Target Speaker Extraction(대상 화자 추출)입니다."],
+  ["STFT 마스크", "소리를 짧은 시간 조각과 주파수 칸으로 나눈 표(스펙트로그램)에서, 칸마다 대상 목소리 비율을 보고 곱할 값(0~1)을 정해 그 칸의 크기를 줄이거나 키웁니다. 이 값 묶음이 마스크입니다."],
+  ["PyTorch", "AI 모델을 학습하고 실행하는 파이썬 라이브러리입니다. REAL-TSE 모델이 PyTorch로 만들어져 있습니다."],
+  ["SciPy", "과학·신호 계산용 파이썬 라이브러리입니다. 소리를 STFT로 변환하고 되돌리는 계산에 씁니다."],
+  ["ONNX", "AI 모델을 프로그램 종류와 상관없이 같은 파일 형식으로 저장하는 규격입니다. PyTorch 같은 학습 도구 없이도 이 파일을 CPU에서 실행할 수 있습니다."],
+  ["sherpa-onnx", "ONNX 모델을 CPU에서 돌리는 음성 처리 도구입니다. 여기서는 긴 녹음을 화자별로 나누는 데 써서, 기준 목소리 후보 구간을 찾습니다."],
+];
+
+function Glossary() {
+  return (
+    <dl className="vk-terms">
+      {TERMS.map(([t, d]) => <div key={t}><dt>{t}</dt><dd>{d}</dd></div>)}
+    </dl>
+  );
+}
+
 export function How() {
   return (
     <section className="vk-panel" aria-labelledby="panel-title">
@@ -154,7 +171,7 @@ export function How() {
         <h1 id="panel-title" className="vk-display">원리와 구조</h1>
       </header>
       <Tabs label="원리와 구조" items={[
-        { value: "structure", label: "구조", content: <div className="vk-how-tab"><Arch /></div> },
+        { value: "structure", label: "구조", content: <div className="vk-how-tab"><Arch /><Glossary /></div> },
         { value: "principle", label: "원리", content: <Principle /> },
       ]} />
     </section>
