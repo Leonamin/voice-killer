@@ -183,3 +183,8 @@ a.gc-button { text-decoration: none; }
 .vk-check-box .gc-checkbox-input { width: 24px; height: 24px; position: relative; }
 .vk-check-box .gc-checkbox-input:checked:before { width: 18px; height: 18px; }
 @media (prefers-reduced-motion: reduce) { .vk-check-box::before { transition: none; } .vk-check-box:has(input:checked)::after { animation: none; } }
+.vk-mask-ex { display: flex; flex-direction: column; gap: var(--vk-space-md); padding: var(--vk-space-md); border-radius: var(--vk-rounded-md); background: var(--vk-surface-subtle); }
+.vk-mask-ex-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--vk-space-xs) var(--vk-space-md); font-size: var(--vk-label-size); }
+.vk-mask-ex-bar { height: 8px; margin-top: var(--vk-space-xs); border-radius: var(--vk-rounded-full); background: var(--vk-surface-raised); overflow: hidden; }
+.vk-mask-ex-bar i { display: block; height: 100%; background: var(--vk-primary); transition: width 0.2s; }
+@media (prefers-reduced-motion: reduce) { .vk-mask-ex-bar i { transition: none; } }

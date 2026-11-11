@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { QueueNote } from "./Queue";
+import { maskOf } from "./How";
 import { Alert, Button, Card, Progress, RadioGroup, Slider } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
 import { refBlobOf, refRangeOf, statusOf, ADJUST_LABEL, useApp, type NodeId, type Range, type Result } from "./state";
@@ -204,6 +205,25 @@ function ResultBlock({ res }: { res: Result }) {
   );
 }
 
+/** Live example for the p slider: how much a half-mixed cell counts as the target voice. Same formula as the server (no hard cut below 0.65). */
+function MaskExample({ p }: { p: number }) {
+  const rows = [{ share: 0.6, text: "대상 목소리 60%, 주변 소리 40%가 섞인 칸" }, { share: 0.4, text: "대상 목소리 40%, 주변 소리 60%가 섞인 칸" }];
+  return (
+    <div className="vk-mask-ex" aria-label="p 예시">
+      {rows.map((r) => {
+        const m = Math.round(maskOf(r.share, p) * 100);
+        return (
+          <div key={r.share}>
+            <div className="vk-mask-ex-row"><span>{r.text}</span><strong>대상으로 {m}% 취급</strong></div>
+            <div className="vk-mask-ex-bar" aria-hidden="true"><i style={{ width: `${m}%` }} /></div>
+          </div>
+        );
+      })}
+      <p className="vk-muted" style={{ margin: 0 }}>p를 올리면 애매한 칸도 한쪽으로 확실히 갈립니다. 1이면 섞인 비율 그대로 취급합니다. <a href="#/how">원리 탭의 그림</a>에서 칸별로 볼 수 있습니다.</p>
+    </div>
+  );
+}
+
 export function AdjustPanel() {
   const { s, run } = useApp();
   const [u, setU] = useState(0); // starts at the centre = unchanged
@@ -227,7 +247,8 @@ export function AdjustPanel() {
           description={shouldKeepTarget ? "왼쪽으로 밀수록 기준 목소리를 뺀 나머지 소리가 줄어듭니다." : "왼쪽으로 밀면 줄이고, 가운데는 그대로, 오른쪽으로 밀면 키웁니다."} />
       </div>
       <Slider label="마스크 날카로움 (p)" min={1} max={8} step={1} value={p} onValueChange={setP} valueText={String(p)}
-        description="클수록 대상과 주변 소리를 더 날카롭게 가릅니다. 기본 4." />
+        description="한 칸에 대상과 주변 소리가 섞여 있을 때, 그 칸을 대상으로 볼지 정하는 기준의 날카로움입니다. 기본 4." />
+      <MaskExample p={p} />
       {!shouldKeepTarget && u > 0 &&<p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
       {isRunning && <><Progress label="처리 중" size="thin" /><QueueNote /></>}
       {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={isRunning || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}

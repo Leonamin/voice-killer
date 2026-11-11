@@ -15,7 +15,7 @@ const hash = (a: number, b: number) => { const v = Math.sin(a * 127.1 + b * 311.
 
 const HARD = 0.65; // dsp.suppress hard_threshold: cells with ratio >= HARD are cut fully
 /** Same steps as dsp.suppress: ratio q = S / (S + R), sharpen with power p, hard cut at HARD. */
-const maskOf = (q: number, p: number) => (q >= HARD ? 1 : q ** p / (q ** p + (1 - q) ** p));
+export const maskOf = (q: number, p: number) => (q >= HARD ? 1 : q ** p / (q ** p + (1 - q) ** p));
 const RATIO = Float32Array.from(S, (s, i) => s / (s + R[i]));
 const SHOWN_DB = 35; // brightness range: 0 dB (loudest) .. -35 dB
 const bright = (mag: number) => Math.min(1, Math.max(0, 1 + 20 * Math.log10(Math.max(mag, 1e-9)) / SHOWN_DB));
