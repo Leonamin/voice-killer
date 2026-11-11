@@ -163,3 +163,23 @@ a.gc-button { text-decoration: none; }
 .vk-terms { margin: 0; display: grid; gap: var(--vk-space-md); }
 .vk-terms dt { font-weight: 600; }
 .vk-terms dd { margin: 2px 0 0; color: var(--vk-text-muted); }
+.vk-cand { display: flex; flex-direction: column; gap: var(--vk-space-md); }
+.vk-voice { border-radius: var(--vk-rounded-md); background: var(--vk-surface-subtle); overflow: hidden; }
+.vk-voice-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--vk-space-xs) var(--vk-space-md); padding: var(--vk-space-xs) var(--vk-space-md) var(--vk-space-xs) var(--vk-space-md); border-bottom: 1px solid var(--vk-border); }
+.vk-voice-name { margin: 0; font-size: 16px; font-weight: 700; }
+.vk-voice-head .vk-muted { font-size: var(--vk-label-size); }
+.vk-voice-spans { list-style: none; margin: 0; padding: var(--vk-space-sm) var(--vk-space-md); display: flex; flex-direction: column; gap: var(--vk-space-sm); }
+.vk-span { display: flex; flex-wrap: wrap; align-items: center; gap: var(--vk-space-sm) var(--vk-space-md); }
+/* 체크박스: 44px 누름 영역, 호버하면 뒤에 원형 번짐, 체크하면 고리가 퍼진다. (Material state layer 방식) */
+.vk-check { display: inline-flex; align-items: center; gap: var(--vk-space-xs); min-height: 44px; padding-right: var(--vk-space-md); border-radius: var(--vk-rounded-full); cursor: pointer; user-select: none; font-size: var(--vk-label-size); font-weight: var(--vk-label-weight); }
+.vk-check-box { position: relative; display: grid; place-items: center; width: 44px; height: 44px; flex: none; }
+.vk-check-box::before, .vk-check-box::after { content: ""; position: absolute; inset: 2px; border-radius: 50%; pointer-events: none; }
+.vk-check-box::before { background: var(--vk-primary); opacity: 0; transform: scale(0.4); transition: opacity 0.15s, transform 0.2s; }
+.vk-check:hover .vk-check-box::before { opacity: 0.18; transform: scale(1); }
+.vk-check:active .vk-check-box::before { opacity: 0.3; }
+.vk-check-box::after { border: 2px solid var(--vk-primary); opacity: 0; }
+.vk-check-box:has(input:checked)::after { animation: vk-splash 0.45s ease-out; }
+@keyframes vk-splash { from { opacity: 0.7; transform: scale(0.5); } to { opacity: 0; transform: scale(1.1); } }
+.vk-check-box .gc-checkbox-input { width: 24px; height: 24px; position: relative; }
+.vk-check-box .gc-checkbox-input:checked:before { width: 18px; height: 18px; }
+@media (prefers-reduced-motion: reduce) { .vk-check-box::before { transition: none; } .vk-check-box:has(input:checked)::after { animation: none; } }
