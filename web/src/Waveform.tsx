@@ -11,7 +11,7 @@ const clock = (t: number) => `${Math.floor(t / 60)}:${(t % 60).toFixed(3).padSta
 /** One draggable region over a waveform, with play controls, a live clock and a 0-300% volume. `range` is read only at creation; edits flow out through onRange.
  *  kind "result" shows the bare waveform (no region); `wsRef` exposes the player to the caller. */
 export function Waveform({ blob, range, initial, kind, label, note, onReady, onRange, wsRef }: {
-  blob: Blob; range?: Range | null; initial?: (duration: number) => Range; kind: "process" | "reference" | "result"; label: string; note?: ReactNode;
+  blob: Blob; range?: Range | null; initial?: (duration: number) => Range; kind: "process" | "reference" | "preview" | "result"; label: string; note?: ReactNode;
   onReady?: (duration: number) => void; onRange?: (r: Range) => void; wsRef?: MutableRefObject<WaveSurfer | null>;
 }) {
   const box = useRef<HTMLDivElement>(null);
@@ -43,8 +43,8 @@ export function Waveform({ blob, range, initial, kind, label, note, onReady, onR
       show(0, d);
       if (kind !== "result") {
         const r = latest.current.range ?? latest.current.initial!(d);
-        const c = kind === "process" ? "--vk-primary" : "--vk-live";
-        me.region = regions.addRegion({ start: r.start, end: Math.min(r.end, d), content: label, drag: true, resize: true, color: `color-mix(in srgb, var(${c}) 35%, transparent)` });
+        const c = kind === "reference" ? "--vk-live" : "--vk-primary";
+        me.region = regions.addRegion({ start: r.start, end: Math.min(r.end, d), content: kind === "preview" ? undefined : label, drag: true, resize: kind !== "preview", color: `color-mix(in srgb, var(${c}) 35%, transparent)` });
       }
       latest.current.onReady?.(d);
     });

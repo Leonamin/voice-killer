@@ -188,3 +188,7 @@ a.gc-button { text-decoration: none; }
 .vk-mask-ex-bar { height: 8px; margin-top: var(--vk-space-xs); border-radius: var(--vk-rounded-full); background: var(--vk-surface-raised); overflow: hidden; }
 .vk-mask-ex-bar i { display: block; height: 100%; background: var(--vk-primary); transition: width 0.2s; }
 @media (prefers-reduced-motion: reduce) { .vk-mask-ex-bar i { transition: none; } }
+.vk-preview { display: flex; flex-direction: column; gap: var(--vk-space-md); padding: var(--vk-space-md); border-radius: var(--vk-rounded-md); background: var(--vk-surface-subtle); }
+.vk-preview .vk-title { margin: 0; font-size: 16px; }
+.vk-preview .vk-wave { background: var(--vk-surface); }
+.vk-stale { color: var(--vk-warning); font-size: var(--vk-label-size); }

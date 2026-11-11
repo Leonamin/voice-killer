@@ -88,12 +88,13 @@ type Ctx = { s: State; dispatch: React.Dispatch<Action>; run: (p: Params) => Pro
 const C = createContext<Ctx | null>(null);
 export const useApp = () => useContext(C)!;
 
-async function request(s: State, p: Params): Promise<Result> {
-  const src = s.source, rr = refRangeOf(s), rb = refBlobOf(s);
-  if (!src?.range || !rr || !rb) throw new Error("원본 오디오와 기준 목소리가 필요합니다");
+/** `range` overrides the 처리 구간 (used by the 3-second preview). */
+export async function request(s: State, p: Params, range?: Range): Promise<Result> {
+  const src = s.source, rr = refRangeOf(s), rb = refBlobOf(s), pr = range ?? src?.range;
+  if (!src || !pr || !rr || !rb) throw new Error("원본 오디오와 기준 목소리가 필요합니다");
   const fd = new FormData();
   fd.append("audio", src.blob, "input");
-  fd.append("start", String(src.range.start)); fd.append("end", String(src.range.end));
+  fd.append("start", String(pr.start)); fd.append("end", String(pr.end));
   if (s.reference.mode === "file") fd.append("ref", rb, "ref");
   fd.append("ref_start", String(rr.start)); fd.append("ref_end", String(rr.end));
   fd.append("strength", String(p.strength));
@@ -106,7 +107,7 @@ async function request(s: State, p: Params): Promise<Result> {
     throw new Error(`${r.status}: ${m}`);
   }
   const blob = await r.blob();
-  return { blob, url: URL.createObjectURL(blob), origUrl: URL.createObjectURL(src.blob), procStart: src.range.start, params: p, createdAt: Date.now() };
+  return { blob, url: URL.createObjectURL(blob), origUrl: URL.createObjectURL(src.blob), procStart: pr.start, params: p, createdAt: Date.now() };
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {

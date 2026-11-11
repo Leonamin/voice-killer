@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { QueueNote } from "./Queue";
+import { Preview } from "./Preview";
 import { maskOf } from "./How";
 import { Alert, Button, Card, Progress, RadioGroup, Slider } from "./ui/components";
 import { go, labelOf, NODES, StatusBadge } from "./App";
@@ -234,7 +235,9 @@ export function AdjustPanel() {
   const [who, setWho] = useState<"target" | "rest">("target"); // rest = keep the reference voice, reduce everything else
   const [p, setP] = useState(4); // mask sharpness; server default 4
   const shouldKeepTarget = who === "rest";
-  const exec = () => run({ strength: shouldKeepTarget ? -u : strengthOf(u), shouldKeepTarget, maskPower: p });
+  const params = { strength: shouldKeepTarget ? -u : strengthOf(u), shouldKeepTarget, maskPower: p };
+  const exec = () => run(params);
+  const settingsText = `${shouldKeepTarget ? (u === 0 ? "그대로" : `나머지 줄이기 ${Math.round(-u * 100)}%`) : describe(u)}, p ${p}`;
   return (
     <Panel title={ADJUST_LABEL}
       cta={res ? undefined : <Button isLoading={isRunning} disabled={missing.length > 0 || u === 0} onClick={exec}>실행</Button>}>
@@ -249,6 +252,7 @@ export function AdjustPanel() {
       <Slider label="마스크 날카로움 (p)" min={1} max={8} step={1} value={p} onValueChange={setP} valueText={String(p)}
         description="한 칸에 대상과 주변 소리가 섞여 있을 때, 그 칸을 대상으로 볼지 정하는 기준의 날카로움입니다. 기본 4." />
       <MaskExample p={p} />
+      {statusOf(s, "source") === "완료" && statusOf(s, "reference") === "완료" && <Preview params={params} label={settingsText} isDisabled={u === 0} />}
       {!shouldKeepTarget && u > 0 &&<p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
       {isRunning && <><Progress label="처리 중" size="thin" /><QueueNote /></>}
       {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={isRunning || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}
