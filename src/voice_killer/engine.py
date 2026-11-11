@@ -25,9 +25,9 @@ def extract(mixture, enrollment, extractor=None, chunk_seconds=12.0, overlap_sec
     return extractor.extract(mixture, enrollment, chunk_seconds, overlap_seconds)[0]
 
 
-def remove(mixture, enrollment, strength=1.0, extractor=None, mask_power=4.0, hard_threshold=0.65):
+def remove(mixture, enrollment, strength=1.0, extractor=None, mask_power=4.0, hard_threshold=0.65, should_keep_target=False):
     target = extract(mixture, enrollment, extractor)
-    return suppress(mixture, target, strength, "mask", mask_power, hard_threshold)
+    return suppress(mixture, target, strength, "mask", mask_power, hard_threshold, should_keep_target)
 
 
 ROOT = Path(__file__).resolve().parents[2]

@@ -75,3 +75,14 @@ def test_confident_target_bins_are_removed_not_just_made_quieter():
     assert np.sqrt(np.mean(y*y)) < 1e-7
     soft = suppress(x, 1.26*x, hard_threshold=1)
     assert np.sqrt(np.mean(soft*soft)) > 1e-5
+
+
+def test_keep_target_reduces_only_the_rest():
+    t = np.arange(32000) / 16000
+    target = .25 * np.sin(2 * np.pi * 312.5 * t)
+    audience = .1 * np.sin(2 * np.pi * 2250 * t)
+    output = suppress(target + audience, target, mask_power=2, should_keep_target=True)
+    assert .98 < np.dot(output, target) / np.dot(target, target) < 1.02
+    assert abs(np.dot(output, audience) / np.dot(audience, audience)) < .02
+    with pytest.raises(ValueError):
+        suppress(target, target, strength=-1, should_keep_target=True)

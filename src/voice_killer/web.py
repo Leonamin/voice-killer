@@ -69,9 +69,14 @@ def crop(x, start, end, name, max_seconds=None):
 
 @app.post("/api/process")
 def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float = Form(...), ref: UploadFile | None = File(None),
-            ref_start: float = Form(0.0), ref_end: float = Form(...), strength: float = Form(1.0)):
+            ref_start: float = Form(0.0), ref_end: float = Form(...), strength: float = Form(1.0),
+            keep: bool = Form(False), mask_power: float = Form(4.0)):
+    if not 0 < mask_power <= 16:  # also rejects NaN
+        raise HTTPException(400, "mask_power는 0 초과 16 이하여야 합니다")
     if not -4 <= strength <= 1:  # also rejects NaN; negative = boost
         raise HTTPException(400, "strength는 -4~1이어야 합니다")
+    if keep and strength < 0:
+        raise HTTPException(400, "나머지 줄이기의 strength는 0~1이어야 합니다")
     x = decode(audio)
     mix = crop(x, start, end, "처리", MAX_SECONDS)
     enroll = crop(decode(ref) if ref and ref.filename else x, ref_start, ref_end, "기준 목소리")
@@ -80,7 +85,7 @@ def process(audio: UploadFile = File(...), start: float = Form(0.0), end: float 
     except ValueError as e:
         raise HTTPException(400, f"기준 목소리 구간: {e}")
     with lock:
-        out = engine.remove(mix, enroll, strength)
+        out = engine.remove(mix, enroll, strength, mask_power=mask_power, should_keep_target=keep)
     buf = io.BytesIO()
     sf.write(buf, out.astype(np.float32), SR, format="WAV", subtype="FLOAT")
     return Response(buf.getvalue(), media_type="audio/wav")

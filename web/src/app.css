@@ -100,7 +100,7 @@ a.gc-button { text-decoration: none; }
     var(--gc-accent) max(50%, var(--gc-slider-fill)), var(--gc-progress-track) max(50%, var(--gc-slider-fill)));
 }
 /* Direction reads from colour (DESIGN.md reduce/boost), not only from the label. */
-.vk-centered[data-side="reduce"] { --gc-accent: var(--vk-reduce); --gc-focus: var(--vk-reduce); }
+.vk-centered[data-side="reduce"], .vk-reduce-only[data-side="reduce"] { --gc-accent: var(--vk-reduce); --gc-focus: var(--vk-reduce); }
 .vk-centered[data-side="boost"] { --gc-accent: var(--vk-boost); }
 
 /* 구조 그림 (stack-diagram). 색은 토큰만 쓴다. 타일은 로고가 보이도록 흰색을 유지한다. */
@@ -156,6 +156,10 @@ a.gc-button { text-decoration: none; }
 .vk-curve-cut { stroke: var(--vk-text-muted); stroke-width: 1; stroke-dasharray: 2 3; }
 .vk-curve-axis { stroke: var(--vk-control-border); stroke-width: 1; }
 .vk-spectro { width: 100%; height: auto; aspect-ratio: 5 / 2; image-rendering: pixelated; background: var(--vk-bg); border: 1px solid var(--vk-border); border-radius: var(--vk-rounded-md); display: block; }
+/* Reduce-only slider (range -1..0): the amount grows to the left, so colour from the thumb to the right end. */
+.vk-reduce-only .gc-slider-input {
+  --gc-slider-bg: linear-gradient(to right, var(--gc-progress-track) var(--gc-slider-fill), var(--gc-accent) var(--gc-slider-fill));
+}
 .vk-terms { margin: 0; display: grid; gap: var(--vk-space-md); }
 .vk-terms dt { font-weight: 600; }
 .vk-terms dd { margin: 2px 0 0; color: var(--vk-text-muted); }

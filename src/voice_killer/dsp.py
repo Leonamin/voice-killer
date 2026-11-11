@@ -11,11 +11,14 @@ def resample(audio, source_rate, target_rate):
     return signal.resample_poly(audio, target_rate // divisor, source_rate // divisor, axis=0).astype(np.float32)
 
 
-def suppress(mixture, target, strength=1.0, method="mask", mask_power=4.0, hard_threshold=0.65):
+def suppress(mixture, target, strength=1.0, method="mask", mask_power=4.0, hard_threshold=0.65, should_keep_target=False):
     """Mono 16 kHz mixture and aligned, unnormalized target estimate."""
     # Negative strength boosts the target: output = X * (1 + |strength| * mask).
+    # should_keep_target: reduce everything else instead: output = X * (1 - strength * (1 - mask)), strength in [0, 1].
     if not -4 <= strength <= 1 or not np.isfinite(strength):
         raise ValueError("strength must be in [-4, 1]")
+    if should_keep_target and (strength < 0 or method != "mask"):
+        raise ValueError("keeping the target needs method mask and strength in [0, 1]")
     if mask_power <= 0 or not np.isfinite(mask_power):
         raise ValueError("mask_power must be positive and finite")
     if not 0 < hard_threshold <= 1 or not np.isfinite(hard_threshold):
@@ -51,5 +54,6 @@ def suppress(mixture, target, strength=1.0, method="mask", mask_power=4.0, hard_
     # Cut confidently target-dominated bins to zero: avoid faint intelligible speech.
     # Threshold 1 leaves the soft mask unchanged except a pure-target bin.
     mask = np.where(target_share >= hard_threshold, 1.0, mask)
-    _, y = signal.istft(X * (1 - strength * mask), nperseg=512, noverlap=384)
+    gain = 1 - strength * ((1 - mask) if should_keep_target else mask)
+    _, y = signal.istft(X * gain, nperseg=512, noverlap=384)
     return y[:n].astype(np.float32)

@@ -5,7 +5,7 @@ export type Range = { start: number; end: number };
 export type NodeId = "source" | "reference" | "adjust";
 export type Status = "필요" | "진행 중" | "완료";
 // strength: 1 = reduce fully, 0 = unchanged, negative = boost (server accepts [-4, 1])
-export type Params = { strength: number };
+export type Params = { strength: number; shouldKeepTarget: boolean; maskPower: number };
 export type Result = { blob: Blob; url: string; origUrl: string; procStart: number; params: Params; createdAt: number };
 export type Clip = { blob: Blob; name: string; duration: number; range: Range | null };
 
@@ -97,6 +97,8 @@ async function request(s: State, p: Params): Promise<Result> {
   if (s.reference.mode === "file") fd.append("ref", rb, "ref");
   fd.append("ref_start", String(rr.start)); fd.append("ref_end", String(rr.end));
   fd.append("strength", String(p.strength));
+  fd.append("keep", String(p.shouldKeepTarget));
+  fd.append("mask_power", String(p.maskPower));
   const r = await fetch("/api/process", { method: "POST", body: fd });
   if (!r.ok) {
     let m = r.statusText;

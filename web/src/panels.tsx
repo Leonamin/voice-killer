@@ -23,7 +23,7 @@ function Missing({ items }: { items: NodeId[] }) {
   return (
     <Alert tone="neutral" title="먼저 필요한 것이 있습니다"
       action={<div className="vk-row" style={{ marginTop: 8 }}>{items.map((i) => <Button key={i} variant="secondary" onClick={() => go(i)}>{labelOf(i)} 지정하기</Button>)}</div>}>
-      {items.map(labelOf).join(", ")}이(가) 아직 없습니다.
+      {(() => { const t = items.map(labelOf).join(", "), c = t.charCodeAt(t.length - 1) - 0xac00; return t + (c >= 0 && c % 28 ? "이" : "가"); })()} 아직 없습니다.
     </Alert>
   );
 }
@@ -210,16 +210,24 @@ export function AdjustPanel() {
   const missing: NodeId[] = [];
   if (statusOf(s, "source") !== "완료") missing.push("source");
   if (statusOf(s, "reference") !== "완료") missing.push("reference");
-  const exec = () => run({ strength: strengthOf(u) });
+  const [who, setWho] = useState<"target" | "rest">("target"); // rest = keep the reference voice, reduce everything else
+  const [p, setP] = useState(4); // mask sharpness; server default 4
+  const shouldKeepTarget = who === "rest";
+  const exec = () => run({ strength: shouldKeepTarget ? -u : strengthOf(u), shouldKeepTarget, maskPower: p });
   return (
     <Panel title={ADJUST_LABEL}
       cta={res ? undefined : <Button isLoading={isRunning} disabled={missing.length > 0 || u === 0} onClick={exec}>실행</Button>}>
       {missing.length > 0 && <Missing items={missing} />}
-      <div className="vk-centered" data-side={u < 0 ? "reduce" : u > 0 ? "boost" : undefined}>
-        <Slider label="크기" min={-1} max={1} step={0.05} value={u} onValueChange={setU} valueText={describe(u)}
-          description="왼쪽으로 밀면 줄이고, 가운데는 그대로, 오른쪽으로 밀면 키웁니다." />
+      <RadioGroup label="조절할 소리" value={who} onValueChange={(v) => { setWho(v as "target" | "rest"); setU(0); }}
+        options={[{ value: "target", label: "기준 목소리를 줄이거나 키움" }, { value: "rest", label: "기준 목소리만 남기고 나머지를 줄임" }]} />
+      <div className={shouldKeepTarget ? "vk-reduce-only" : "vk-centered"} data-side={u < 0 ? "reduce" : u > 0 ? "boost" : undefined}>
+        <Slider label="크기" min={-1} max={shouldKeepTarget ? 0 : 1} step={0.05} value={u} onValueChange={setU}
+          valueText={shouldKeepTarget ? (u === 0 ? "그대로" : `나머지 줄이기 ${Math.round(-u * 100)}%`) : describe(u)}
+          description={shouldKeepTarget ? "왼쪽으로 밀수록 기준 목소리를 뺀 나머지 소리가 줄어듭니다." : "왼쪽으로 밀면 줄이고, 가운데는 그대로, 오른쪽으로 밀면 키웁니다."} />
       </div>
-      {u > 0 && <p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
+      <Slider label="마스크 날카로움 (p)" min={1} max={8} step={1} value={p} onValueChange={setP} valueText={String(p)}
+        description="클수록 대상과 주변 소리를 더 날카롭게 가릅니다. 기본 4." />
+      {!shouldKeepTarget && u > 0 &&<p className="vk-muted" style={{ margin: 0 }}>키우면 대상 목소리와 함께 주변 소리도 조금 커지고, 크게 키우면 소리가 깨질 수 있습니다.</p>}
       {isRunning && <Progress label="처리 중" size="thin" />}
       {err && <Alert tone="danger" title="오류" action={<div style={{ marginTop: 8 }}><Button variant="secondary" disabled={isRunning || missing.length > 0} onClick={exec}>재시도</Button></div>}>{err}</Alert>}
       {res && <ResultBlock key={res.createdAt} res={res} />}
